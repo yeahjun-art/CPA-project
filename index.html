@@ -291,7 +291,7 @@
             <span class="nick-ghost" id="nickGhost">닉네임</span>
             <input class="nick-in" id="nickInput" placeholder="닉네임" maxlength="16" />
           </span>
-          <div style="font-size:11.5px; color:#5f5b54" id="userLabel"></div>
+          <div style="font-size:11.5px; color:#807b73; font-weight:600" id="myCode"></div>
         </div>
       </div>
     </div>
@@ -374,7 +374,7 @@
       <div style="display:flex; flex-direction:column; gap:8px">
         <div style="font-size:12px; letter-spacing:2px; color:#807b73; font-weight:600">친구 찾기</div>
         <div style="display:flex; gap:8px">
-          <input class="fr-in" id="frSearch" placeholder="친구의 닉네임" autocomplete="off" />
+          <input class="fr-in" id="frSearch" placeholder="친구의 번호(#38841) 또는 닉네임" autocomplete="off" />
           <button class="fr-btn" id="frSearchBtn">찾기</button>
         </div>
         <div class="fr-msg" id="frMsg"></div>
@@ -930,21 +930,35 @@ async function ensureProfile() {
   if (!isOnline()) return;
   const { data } = await sb.from("profiles").select("*").eq("user_id", state.user.id).maybeSingle();
   myProfile = data || null;
-  if (myProfile && myProfile.nickname && !nickname) {
+  if (myProfile && myProfile.nickname) {
     nickname = myProfile.nickname;
     saveLocal();
-    render();
+  } else if (nickname && nickname.trim().length >= 2) {
+    await saveNickname(nickname);
   }
+  render();
 }
+
+function newCode() { return String(Math.floor(10000 + Math.random() * 90000)); }
 
 async function saveNickname(nick) {
   if (!isOnline()) return { ok: true };
   const n = (nick || "").trim();
-  if (!n) return { ok: false, msg: "닉네임을 적어라." };
-  const { error } = await sb.from("profiles").upsert({ user_id: state.user.id, nickname: n });
-  if (error) return { ok: false, msg: error.code === "23505" ? "이미 쓰는 닉네임이다. 다른 이름을 골라라." : "저장하지 못했다." };
-  myProfile = { user_id: state.user.id, nickname: n };
-  return { ok: true };
+  if (n.length < 2) return { ok: false, msg: "" };
+  const code = (myProfile && myProfile.code) || newCode();
+  for (let i = 0; i < 6; i++) {
+    const c = i === 0 ? code : newCode();
+    const { error } = await sb.from("profiles").upsert({ user_id: state.user.id, nickname: n, code: c });
+    if (!error) {
+      myProfile = { user_id: state.user.id, nickname: n, code: c };
+      return { ok: true };
+    }
+    const m = (error.message || "") + (error.details || "");
+    if (error.code === "23505" && m.indexOf("code") >= 0) continue;
+    if (error.code === "23505") return { ok: false, msg: "이미 쓰는 닉네임이다. 다른 이름을 골라라." };
+    return { ok: false, msg: "저장하지 못했다. profiles 표에 code 칸이 있는지 확인해라." };
+  }
+  return { ok: false, msg: "번호를 만들지 못했다. 다시 시도해라." };
 }
 
 async function pushStatus(st) {
@@ -1007,13 +1021,17 @@ $("frSearchBtn").onclick = async () => {
   const q = ($("frSearch").value || "").trim();
   $("frResults").innerHTML = "";
   if (!q) { $("frMsg").textContent = "닉네임을 적어라."; return; }
-  if (!myProfile) { $("frMsg").textContent = "먼저 왼쪽 위에 내 닉네임을 정해라."; return; }
+  if (!myProfile || !myProfile.nickname) { $("frMsg").textContent = "먼저 왼쪽 위에 내 닉네임을 적어라."; return; }
   $("frMsg").textContent = "";
-  const { data } = await sb.from("profiles").select("user_id, nickname").ilike("nickname", "%" + q + "%").limit(8);
+  const digits = q.replace(/[^0-9]/g, "");
+  const query = (digits.length >= 4 && /^#?\s*[0-9]+$/.test(q))
+    ? sb.from("profiles").select("user_id, nickname, code").eq("code", digits).limit(8)
+    : sb.from("profiles").select("user_id, nickname, code").ilike("nickname", "%" + q + "%").limit(8);
+  const { data } = await query;
   const hits = (data || []).filter(p => p.user_id !== state.user.id && !friends.some(f => f.id === p.user_id));
   if (!hits.length) { $("frMsg").textContent = "그런 닉네임은 없다."; return; }
   $("frResults").innerHTML = hits.map(p =>
-    '<div class="fr-pend"><div class="fr-nm">' + esc(p.nickname) + '</div>' +
+    '<div class="fr-pend"><div class="fr-nm">' + esc(p.nickname) + ' <span style="color:#807b73; font-weight:500">#' + esc(p.code || "") + '</span></div>' +
     '<button class="fr-mini go" data-req="' + p.user_id + '">친구 신청</button></div>'
   ).join("");
   Array.prototype.forEach.call($("frResults").querySelectorAll("[data-req]"), b => {
@@ -1115,9 +1133,8 @@ $("nickInput").oninput = () => { nickname = $("nickInput").value; $("nickGhost")
 
 $("nickInput").onchange = async () => {
   const r = await saveNickname(nickname);
-  if (!r.ok) { $("frMsg").textContent = r.msg; return; }
-  $("frMsg").textContent = "";
-  loadFriends();
+  $("frMsg").textContent = r.ok ? "" : r.msg;
+  if (r.ok) { render(); loadFriends(); }
 };
 
 function setGoal(v) {
@@ -1226,6 +1243,7 @@ function render() {
   $("userLabel").textContent = state.user.email;
   if (document.activeElement !== $("nickInput")) $("nickInput").value = nickname;
   $("nickGhost").textContent = nickname || "닉네임";
+  $("myCode").textContent = (myProfile && myProfile.code) ? "#" + myProfile.code : "";
   $("goalVal").textContent = GOAL_HOURS;
   $("sessionLabel").textContent = fmt(state.elapsed);
   $("statusText").textContent = state.status === "running" ? name + " 감시 중" : state.status === "paused" ? "잠시 멈춤" : "대기 중";
