@@ -76,6 +76,9 @@
   .subj:hover { border-color:#b91c1c; }
   .subj.on { border-color:#b91c1c; }
   .subj-n { font-size:14px; font-weight:600; color:#eeeae1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tone-b { font-family:inherit; font-size:12px; font-weight:600; color:#a9a49b; background:#131311; border:1px solid #33302a; border-radius:999px; padding:7px 13px; }
+  .tone-b:hover { color:#eeeae1; border-color:#6b5642; }
+  .tone-b.on { color:#fffaf0; background:#b91c1c; border-color:#b91c1c; }
   .sw { width:26px; height:26px; border-radius:50%; border:2px solid transparent; padding:0; cursor:pointer; transition:transform .15s ease; }
   .sw.on { border-color:#f6f2e9; transform:scale(1.15); }
   .bar-stack { width:100%; min-height:3px; display:flex; flex-direction:column; justify-content:flex-end; border-radius:6px 6px 0 0; overflow:hidden; background:#26241f; transition:height .4s ease; }
@@ -132,9 +135,10 @@
   .fr-nm { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .fr-live { flex:none; font-size:10.5px; font-weight:600; color:#8fd6c4; background:#17302c; border:1px solid #2f5f55; border-radius:999px; padding:2px 8px; white-space:nowrap; }
   .horn-w { position:relative; display:inline-flex; }
-  .horn-w .hl, .horn-w .hr { position:absolute; top:-11px; width:7px; height:13px; background:linear-gradient(180deg,#fff7e4 0%,#dcc79a 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); }
-  .horn-w .hl { left:-4px; transform:rotate(-22deg); }
-  .horn-w .hr { right:-4px; transform:rotate(22deg); }
+  .horn-w { min-width:20px; justify-content:center; }
+  .horn-w .hl, .horn-w .hr { position:absolute; top:-13px; width:10px; height:15px; background:#f3e4c8; }
+  .horn-w .hl { left:-5px; clip-path:polygon(0 0, 100% 100%, 38% 100%); transform:rotate(-10deg); }
+  .horn-w .hr { right:-5px; clip-path:polygon(100% 0, 0 100%, 62% 100%); transform:rotate(10deg); }
   .club-i { position:relative; width:22px; height:28px; flex:none; }
   .club-i .cb { position:absolute; left:50%; top:50%; width:52px; height:104px; transform:translate(-50%,-50%) rotate(38deg) scale(.27); }
   .fr-loser { flex:none; font-size:10.5px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:2px 8px; white-space:nowrap; }
@@ -315,6 +319,10 @@
       <div style="font-size:12px; color:#6f6b64" id="subjHint"></div>
       <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:6px" id="palette"></div>
       <div style="font-size:11.5px; color:#6f6b64">과목 색을 골라라</div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:14px">
+        <div style="font-size:12px; letter-spacing:2.5px; color:#807b73; font-weight:600">도깨비 말투</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center" id="tonePick"></div>
+      </div>
     </div>
     <div class="timer" id="sessionLabel">00:00:00</div>
     <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
@@ -541,7 +549,7 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
 let GOAL_HOURS = 4;        // 하루 목표 시간 (화면에서 바꿀 수 있다)
 const GRACE_SECONDS = 3;   // 이 시간보다 짧게 나갔다 오면 안 셈
 const SOUND = true;        // 경고음
-const TONE = "귀엽게 툴툴";
+let TONE = "귀엽게 툴툴";
 
 const LINES = {
   "귀엽게 툴툴": [
@@ -552,11 +560,26 @@ const LINES = {
   ],
   "구수한 사투리": [
     ["야! 니 또 어디 갔다 왔노", "인강은 혼자 돌아가고 있드나. 도깨비가 다 봤다."],
-    ["어허, 손이 왜 저짝으로 가노", "한 번만 더 그카믄 방망이로 책상 두드린다."]
+    ["어허, 손이 왜 저짝으로 가노", "한 번만 더 그카믄 방망이로 책상 두드린다."],
+    ["니 눈이 딴 데 가 있드라", "앉아라. 강의 처음부터 다시 듣기 싫으믄."],
+    ["아까부터 지켜봤다이", "공부는 니가 하고 딴짓은 누가 하노. 니가 하지."],
+    ["뭐 그리 급하게 나갔다 오노", "숨 고르고 화면 봐라. 도깨비 성질 긁지 말고."],
+    ["이 자슥, 또 나갔드나", "니 합격표 내가 들고 있다. 자리에 앉아라."]
   ],
   "무섭고 짧은 호통": [
     ["돌아왔군.", "나는 네가 나간 순간부터 세고 있었다."],
-    ["또.", "변명은 듣지 않는다. 화면으로 돌아가라."]
+    ["또.", "변명은 듣지 않는다. 화면으로 돌아가라."],
+    ["어디 갔었나.", "시간은 되돌려주지 않는다."],
+    ["앉아라.", "두 번은 말하지 않겠다."],
+    ["기억해 두었다.", "네가 버린 시간을 하나도 잊지 않는다."],
+    ["눈을 들어라.", "화면 밖에 네 답은 없다."]
+  ],
+  "차갑고 사무적인 경고": [
+    ["이탈이 감지되었습니다", "학습 세션 이탈이 기록되었습니다."],
+    ["복귀 확인", "누적 이탈 횟수가 갱신되었습니다."],
+    ["주의", "이탈이 반복되면 오늘 목표 달성이 어렵습니다."],
+    ["기록 완료", "이탈 시각과 복귀 시각이 저장되었습니다."],
+    ["경고 3단계", "집중 시간이 초기화되었습니다."]
   ]
 };
 
@@ -715,7 +738,7 @@ function curName() { return ($("subjInput").value || "").trim() || "공부"; }
 
 /* ---------------- 저장 / 불러오기 ---------------- */
 function saveLocal() {
-  try { localStorage.setItem(KEY, JSON.stringify({ days: state.days, user: state.user, subject: state.subject, colors, goalHours: GOAL_HOURS, nickname })); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify({ days: state.days, user: state.user, subject: state.subject, colors, goalHours: GOAL_HOURS, nickname, tone: TONE })); } catch (e) {}
 }
 function loadLocal() {
   try {
@@ -725,6 +748,7 @@ function loadLocal() {
     colors = p.colors || {};
     if (p.goalHours) GOAL_HOURS = p.goalHours;
     nickname = p.nickname || "";
+    if (p.tone && LINES[p.tone]) TONE = p.tone;
     if (!sb) state.user = p.user || null;
   } catch (e) {}
 }
@@ -1111,7 +1135,7 @@ function renderFriends() {
   } else {
     $("frRank").innerHTML = all.map((r, i) =>
       '<div class="fr-row' + (r.isMe ? " me" : "") + '">' +
-        '<div class="fr-rank' + (i === 0 ? " top" : "") + '" style="display:flex; align-items:center; justify-content:center; gap:3px">' +
+        '<div class="fr-rank' + (i === 0 ? " top" : "") + '" style="display:flex; align-items:center; justify-content:center; gap:7px">' +
           (i === 0
             ? '<span class="horn-w"><span class="hl"></span><span class="hr"></span>1</span>'
             : (i + 1)) +
@@ -1136,7 +1160,7 @@ function renderFriends() {
     const top = ahead[ahead.length - 1];
     const gap = fmtShort(top.today - me.today);
     $("frNote").textContent = ahead.length === 1
-      ? top.nickname + "이(가) 너보다 " + gap + " 더 했다. 본 도깨비는 실망했다."
+      ? top.nickname + "이(가) 너보다 " + gap + " 더 했다. 도깨비가 지켜본다."
       : ahead.length + "명이 너보다 앞서 있다. 방망이 들 준비를 해야 하나?";
     $("frNote").classList.remove("hide");
   } else if (all.length > 1) {
@@ -1265,6 +1289,13 @@ function render() {
   if (document.activeElement !== $("nickInput")) $("nickInput").value = nickname;
   $("nickGhost").textContent = nickname || "닉네임";
   $("myCode").textContent = (myProfile && myProfile.code) ? "#" + myProfile.code : "";
+
+  $("tonePick").innerHTML = Object.keys(LINES).map(t =>
+    '<button class="tone-b' + (t === TONE ? " on" : "") + '" data-t="' + esc(t) + '">' + esc(t) + '</button>'
+  ).join("");
+  Array.prototype.forEach.call($("tonePick").querySelectorAll(".tone-b"), b => {
+    b.onclick = () => { TONE = b.getAttribute("data-t"); saveLocal(); render(); };
+  });
   $("goalVal").textContent = GOAL_HOURS;
   $("sessionLabel").textContent = fmt(state.elapsed);
   $("statusText").textContent = state.status === "running" ? name + " 감시 중" : state.status === "paused" ? "잠시 멈춤" : "대기 중";
