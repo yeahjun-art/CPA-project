@@ -20,6 +20,7 @@
   @keyframes dk-wiggle { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-7px,1px) rotate(-5deg)} 45%{transform:translate(6px,-3px) rotate(5deg)} 70%{transform:translate(-4px,2px) rotate(-3deg)} }
   @keyframes dk-in { from{opacity:0; transform:scale(.93)} to{opacity:1; transform:scale(1)} }
   @keyframes dk-pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+  @keyframes dk-look { 0%,100%{transform:translateX(-3px)} 50%{transform:translateX(3px)} }
 
   #login { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; padding:48px 24px; background:radial-gradient(120% 90% at 50% 0%, #1f1d19 0%, #131311 62%); }
   .title-big { font-family:'Gowun Batang', serif; font-size:44px; font-weight:700; letter-spacing:-1px; }
@@ -31,6 +32,10 @@
   .dk { position:relative; flex:none; }
   .dk-hero { width:200px; height:172px; animation:dk-bob 3.4s ease-in-out infinite; }
   .dk-big { width:236px; height:200px; animation:dk-wiggle .55s ease-in-out 2; }
+  .dk-study { width:236px; height:200px; animation:dk-bob 4s ease-in-out infinite; }
+  .eyeball { width:26px; height:26px; background:#fffaf0; border:1px solid #e3d3b4; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .pupil { width:13px; height:13px; background:#2b1410; border-radius:50%; animation:dk-look 5s ease-in-out infinite; }
+  #study { min-height:100vh; padding:36px 24px; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:22px; overflow-y:auto; background:radial-gradient(120% 80% at 50% 8%, #241f1b 0%, #131311 62%); }
   .horn { position:absolute; background:#f3e4c8; }
   .hood { position:absolute; background:#b91c1c; border-radius:50% 50% 40% 40%; box-shadow:inset 0 -14px 26px rgba(0,0,0,.2); }
   .face { position:absolute; background:#f3e4c8; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
@@ -95,9 +100,18 @@
   .cal-h { align-self:flex-end; font-size:9.5px; line-height:1; }
   .sw { width:15px; height:15px; border-radius:4px; }
 
-  #alert { position:fixed; inset:0; background:rgba(12,10,9,.985); backdrop-filter:blur(8px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:40px; animation:dk-in .18s ease-out; }
+  #alert { position:fixed; inset:0; background:rgba(12,10,9,.985); backdrop-filter:blur(8px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:20px; padding:28px 24px; overflow-y:auto; animation:dk-in .18s ease-out; }
+  @media (max-height: 640px) {
+    .dk-big { transform:scale(.62); margin:-38px 0; }
+    .dk-study { transform:scale(.68); margin:-32px 0; }
+    #motiLine { font-size:26px; }
+    .anger { font-size:32px; }
+    .anger-sub { font-size:14.5px; }
+  }
   .anger { font-family:'Gowun Batang', serif; font-size:50px; font-weight:700; color:#f7efe0; text-align:center; letter-spacing:-1px; line-height:1.15; }
   .anger-sub { font-size:16.5px; color:#b3ada2; text-align:center; max-width:520px; line-height:1.65; }
+  .pardon { font-size:13.5px; font-weight:500; color:#a9a49b; background:transparent; border:1px solid #3a352e; border-radius:999px; padding:10px 18px; }
+  .pardon:hover { color:#f7efe0; border-color:#6b5642; }
 
   @media (max-width: 560px) {
     .title-big { font-size:34px; }
@@ -141,6 +155,58 @@
 
   <button class="g-btn" id="signInBtn"><span class="g-mark">G</span>Google 계정으로 시작하기</button>
   <div style="font-size:12.5px; color:#6f6b64">기록은 계정에 저장되어 다른 기기에서도 이어진다.</div>
+</div>
+
+<!-- ================= 공부 중 화면 ================= -->
+<div id="study" class="hide">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center">
+    <div style="font-size:11.5px; letter-spacing:3px; color:#7a736a; font-weight:600">도깨비가 하는 말</div>
+    <div id="motiLine" style="font-family:'Gowun Batang', serif; font-size:36px; font-weight:700; color:#f3e4c8; letter-spacing:-1px; line-height:1.3; max-width:640px; text-wrap:pretty"></div>
+  </div>
+
+  <div class="dk dk-study">
+    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
+      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
+      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
+      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
+    </div>
+    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
+    <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
+    <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
+    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:11px">
+        <div style="display:flex; gap:19px">
+          <div class="eyeball"><div class="pupil"></div></div>
+          <div class="eyeball"><div class="pupil"></div></div>
+        </div>
+        <div style="width:22px; height:6px; background:#2b1410; border-radius:4px"></div>
+        <div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div>
+        <div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>
+      </div>
+      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px"></div>
+    </div>
+  </div>
+
+  <div id="watchLine" style="font-size:17px; color:#c6bfb3; text-align:center; max-width:520px; line-height:1.6"></div>
+
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px">
+    <div style="font-size:12.5px; color:#807b73; font-weight:600" id="studySubject"></div>
+    <div style="font-size:76px; font-weight:600; line-height:1; letter-spacing:-2.5px; font-variant-numeric:tabular-nums" id="studyTimer">00:00:00</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+    <button class="btn-line" id="studyPause">공부 중지</button>
+    <button class="btn-green" id="studyStop">공부 종료</button>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:18px; font-size:12.5px; color:#6f6b64; flex-wrap:wrap; justify-content:center">
+    <span id="studyToday"></span>
+    <span style="width:1px; height:11px; background:#33302a"></span>
+    <span id="studyDist"></span>
+    <span style="width:1px; height:11px; background:#33302a"></span>
+    <span>중지나 종료를 누르면 첫 화면으로 돌아간다</span>
+  </div>
 </div>
 
 <!-- ================= 대시보드 ================= -->
@@ -299,6 +365,11 @@
     <span style="font-size:12.5px; color:#8b857b">회</span>
   </div>
   <button class="g-btn" id="dismissBtn" style="margin-top:4px">미안, 다시 공부할게</button>
+  <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center">
+    <button class="pardon" id="pardonPause">잠깐 쉬려고 왔어 · 중지</button>
+    <button class="pardon" id="pardonStop">공부 끝내려고 왔어 · 종료</button>
+  </div>
+  <div style="font-size:12px; color:#6f6b64; text-align:center">이 두 개를 누르면 방금 센 딴짓 1회는 지워준다.</div>
 </div>
 
 <!-- Supabase 연결: 설명서 2-5에서 받은 값을 넣으면 켜집니다. 비워두면 이 브라우저에만 저장됩니다. -->
@@ -336,11 +407,80 @@ const LINES = {
   ]
 };
 
+const WATCH = [
+  "눈 하나도 안 감았다. 계속 보고 있어.",
+  "나 여기 있어. 화면에서 눈 떼지 마.",
+  "방망이 들고 대기 중이야. 쓸 일 없게 해줘.",
+  "지금 이 순간도 세고 있어.",
+  "딴 창 열리면 바로 튀어나갈 거다.",
+  "오, 잘하고 있네. 계속 그렇게.",
+  "뿔이 두 개나 돼. 다 보인다.",
+  "숨소리까지 듣고 있어. 넘겨.",
+  "마우스가 어디로 가는지 다 보여.",
+  "나 눈 안 깜빡이는 연습했어.",
+  "알트키에 손 올리지 마.",
+  "여기서 안 움직일 거야. 네가 끝날 때까지.",
+  "등 뒤가 아니라 앞에서 보고 있다.",
+  "화면 밖은 관심 없어. 화면 안만 봐.",
+  "조용히 있을게. 대신 다 적어둘게.",
+  "창 바꾸는 소리는 내가 제일 잘 안다.",
+  "지금 표정 좋다. 그대로 유지해.",
+  "몇 초씩 눈 돌리는 것도 다 세고 있어.",
+  "도깨비는 잠을 안 자. 알지?",
+  "여기 앉아서 너만 보고 있어.",
+  "하품했지. 봤어.",
+  "이 시간은 내가 지켜줄게. 넌 듣기만 해.",
+  "딴 데 갈 마음 접어. 문 앞에 앉아 있다.",
+  "잘 듣고 있네. 방망이는 그대로 둔다.",
+  "나 안 바쁘거든. 계속 보고 있을 거야.",
+  "지금 멈추면 아까워. 조금만 더.",
+  "시계는 내가 볼게. 너는 강의만 봐.",
+  "이 방에서 나가는 사람은 아무도 없어.",
+  "뒤통수까지 보인다. 자세 펴.",
+  "조금 더. 내가 옆에 있잖아."
+];
+const MOTI = [
+  "지금 미룬 한 장, 시험 전날엔 세 장이 된다.",
+  "합격은 머리가 아니라 엉덩이가 한다.",
+  "오늘의 한 시간이 내년의 하루를 줄인다.",
+  "인강은 듣는 게 아니라 견디는 거다.",
+  "졸리면 서서 들어라. 눕지는 마라.",
+  "커피는 핑계고 진도는 현실이다.",
+  "네가 쉬는 동안에도 강의는 안 쉰다.",
+  "이 장만 넘기면 아는 게 하나 늘어난다.",
+  "어제의 너보다 딱 10분만 더.",
+  "재생 속도보다 중요한 건 끝까지 듣는 것.",
+  "미룬 진도에는 이자가 붙는다.",
+  "이해가 안 되면 두 번 들어라. 도망은 답이 아니다.",
+  "필기는 손이 하고 기억은 반복이 한다.",
+  "오늘 3시간이 시험날 3점이 된다.",
+  "다 아는 것 같을 때가 제일 위험하다.",
+  "하기 싫은 과목이 배점이 크다.",
+  "계획은 짧게, 앉아 있는 시간은 길게.",
+  "지금 흘린 땀이 답안지에 남는다.",
+  "집중은 재능이 아니라 습관이다.",
+  "시작이 반이면 나머지 반은 버티기다.",
+  "강의 하나에 딴짓 하나면 남는 건 절반이다.",
+  "남들 쉴 때 한 장, 그게 차이가 된다.",
+  "오늘 못 들으면 내일은 두 배다.",
+  "어려운 장이 점수 차이를 만든다.",
+  "완벽한 컨디션은 시험날에도 안 온다.",
+  "진도는 기분을 기다려주지 않는다.",
+  "10분만 더, 그 말이 합격 문을 연다.",
+  "책상에 앉은 시간이 곧 실력이다.",
+  "지금 졸면 꿈에서도 강의 듣는다.",
+  "끝까지 듣는 사람이 결국 붙는다."
+];
+
 const KEY = "dokkaebi-study-v2";
 const DAY_NAMES = ["일","월","화","수","목","금","토"];
 
 let state = { user: null, status: "idle", elapsed: 0, streak: 0, days: {}, subject: "" };
 let base = 0, startedAt = 0, streakFrom = 0, lastTick = null, leftAt = null, actx = null, saveCount = 0;
+let watchIdx = 0, motiIdx = 0;
+
+setInterval(() => { if (state.status === "running") { watchIdx++; render(); } }, 13000);
+setInterval(() => { if (state.status === "running") { motiIdx++; render(); } }, 21000);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -453,6 +593,8 @@ function beginRun() {
   leftAt = null;
   state.status = "running";
   state.subject = curName();
+  watchIdx = Math.floor(Math.random() * WATCH.length);
+  motiIdx = Math.floor(Math.random() * MOTI.length);
   saveLocal();
   render();
 }
@@ -486,12 +628,27 @@ $("stopBtn").onclick = () => {
   render();
 };
 
+function undoBump() {
+  const key = dayKey();
+  const d = dayOf(key);
+  state.days[key] = { ms: d.ms, dist: Math.max(0, d.dist - 1), sessions: d.sessions, best: d.best, subjects: d.subjects, hours: d.hours };
+  leftAt = null;
+  $("alert").classList.add("hide");
+  saveDay(key);
+}
+
+$("pardonPause").onclick = () => { undoBump(); $("pauseBtn").onclick(); };
+$("pardonStop").onclick = () => { undoBump(); $("stopBtn").onclick(); };
+
 $("dismissBtn").onclick = () => {
   $("alert").classList.add("hide");
   leftAt = null;
   streakFrom = Date.now();
   lastTick = Date.now();
 };
+
+$("studyPause").onclick = () => $("pauseBtn").onclick();
+$("studyStop").onclick = () => $("stopBtn").onclick();
 
 $("subjInput").oninput = () => { state.subject = $("subjInput").value; render(); };
 
@@ -561,9 +718,21 @@ document.addEventListener("visibilitychange", () => document.hidden ? away() : b
 /* ---------------- 화면 그리기 ---------------- */
 function render() {
   const signedIn = !!state.user;
+  const studying = signedIn && state.status === "running";
   $("login").classList.toggle("hide", signedIn);
-  $("app").classList.toggle("hide", !signedIn);
+  $("study").classList.toggle("hide", !studying);
+  $("app").classList.toggle("hide", !signedIn || studying);
   if (!signedIn) return;
+
+  if (studying) {
+    $("motiLine").textContent = MOTI[motiIdx % MOTI.length];
+    $("watchLine").textContent = WATCH[watchIdx % WATCH.length];
+    $("studySubject").textContent = curName();
+    $("studyTimer").textContent = fmt(state.elapsed);
+    const td = dayOf(dayKey());
+    $("studyToday").textContent = "오늘 " + fmtShort(td.ms + state.elapsed);
+    $("studyDist").textContent = "딴짓 " + td.dist + "회";
+  }
 
   const key = dayKey();
   const today = dayOf(key);
