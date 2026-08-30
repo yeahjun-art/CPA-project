@@ -131,11 +131,12 @@
   .fr-name { display:flex; align-items:center; gap:8px; min-width:0; }
   .fr-nm { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .fr-live { flex:none; font-size:10.5px; font-weight:600; color:#8fd6c4; background:#17302c; border:1px solid #2f5f55; border-radius:999px; padding:2px 8px; white-space:nowrap; }
-  .club-i { position:relative; width:9px; height:22px; background:#8a5a34; border-radius:5px; transform:rotate(20deg); flex:none; }
-  .club-i i { position:absolute; width:6px; height:6px; background:#a3703f; border-radius:50%; }
-  .club-i i:nth-child(1) { left:-2px; top:3px; }
-  .club-i i:nth-child(2) { right:-2px; top:9px; }
-  .club-i i:nth-child(3) { left:-2px; top:14px; }
+  .horn-w { position:relative; display:inline-flex; }
+  .horn-w .hl, .horn-w .hr { position:absolute; top:-11px; width:7px; height:13px; background:linear-gradient(180deg,#fff7e4 0%,#dcc79a 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+  .horn-w .hl { left:-4px; transform:rotate(-22deg); }
+  .horn-w .hr { right:-4px; transform:rotate(22deg); }
+  .club-i { position:relative; width:22px; height:28px; flex:none; }
+  .club-i .cb { position:absolute; left:50%; top:50%; width:52px; height:104px; transform:translate(-50%,-50%) rotate(38deg) scale(.27); }
   .fr-loser { flex:none; font-size:10.5px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:2px 8px; white-space:nowrap; }
   .fr-c { font-size:13px; color:#a9a49b; font-variant-numeric:tabular-nums; text-align:right; min-width:56px; }
   .fr-c.big { font-size:15px; font-weight:600; color:#eeeae1; }
@@ -947,6 +948,7 @@ async function ensureProfile() {
   render();
 }
 
+const CLUB_SVG = "<span style=\"position:absolute; left:16px; top:92px; width:20px; height:12px; background:#6b4423; border-radius:7px\"></span><span style=\"position:absolute; left:20px; top:56px; width:12px; height:42px; background:#7a5029; border-radius:5px\"></span><span style=\"position:absolute; left:11px; top:0; width:30px; height:64px; background:linear-gradient(145deg,#c08a4c 0%,#7a4d22 75%); border-radius:15px 15px 9px 9px; box-shadow:inset -4px -6px 10px rgba(0,0,0,.3)\"></span><span style=\"position:absolute; left:-7px; top:8px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(-95deg)\"></span><span style=\"position:absolute; left:-9px; top:30px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(-100deg)\"></span><span style=\"position:absolute; left:-5px; top:48px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(-88deg)\"></span><span style=\"position:absolute; right:-8px; top:1px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(95deg)\"></span><span style=\"position:absolute; right:-10px; top:24px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(100deg)\"></span><span style=\"position:absolute; right:-6px; top:44px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(88deg)\"></span><span style=\"position:absolute; left:18px; top:-13px; width:17px; height:19px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(0deg)\"></span><span style=\"position:absolute; left:12px; top:38px; width:13px; height:15px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(186deg)\"></span><span style=\"position:absolute; left:26px; top:28px; width:12px; height:14px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(172deg)\"></span><span style=\"position:absolute; left:20px; top:14px; width:11px; height:13px; background:linear-gradient(180deg,#f4e8c6 0%,#c8a668 100%); clip-path:polygon(50% 0, 100% 100%, 0 100%); transform:rotate(200deg)\"></span>";
 function newCode() { return String(Math.floor(10000 + Math.random() * 90000)); }
 
 async function grantCode() {
@@ -1109,8 +1111,11 @@ function renderFriends() {
   } else {
     $("frRank").innerHTML = all.map((r, i) =>
       '<div class="fr-row' + (r.isMe ? " me" : "") + '">' +
-        '<div class="fr-rank' + (i === 0 ? " top" : "") + '" style="display:flex; align-items:center; justify-content:center; gap:3px">' + (i + 1) +
-          (i === 0 ? '<span class="club-i"><i></i><i></i><i></i></span>' : "") +
+        '<div class="fr-rank' + (i === 0 ? " top" : "") + '" style="display:flex; align-items:center; justify-content:center; gap:3px">' +
+          (i === 0
+            ? '<span class="horn-w"><span class="hl"></span><span class="hr"></span>1</span>'
+            : (i + 1)) +
+          (i === 0 ? '<span class="club-i" title="도깨비 방망이"><span class="cb">' + CLUB_SVG + '</span></span>' : "") +
         '</div>' +
         '<div class="fr-name">' +
           '<div class="fr-nm">' + esc(r.nickname) + (r.isMe ? " (나)" : "") + '</div>' +
