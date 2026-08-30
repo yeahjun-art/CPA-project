@@ -105,9 +105,14 @@
   .bar { width:100%; min-height:3px; background:#b91c1c; border-radius:6px 6px 0 0; transition:height .4s ease; }
   .row { display:grid; grid-template-columns:1.4fr 1fr .8fr .8fr; gap:12px; padding:13px 4px; border-top:1px solid #26241f; font-size:14.5px; align-items:center; }
   .row-h { display:grid; grid-template-columns:1.4fr 1fr .8fr .8fr; gap:12px; padding:0 4px 10px; font-size:12px; color:#807b73; font-weight:600; }
-  .mini-in { width:52px; font-family:inherit; font-size:12.5px; font-weight:600; color:#eeeae1; background:#131311; border:1px solid #33302a; border-radius:7px; padding:3px 7px; outline:none; text-align:center; }
-  .mini-in:focus { border-color:#b91c1c; }
-  .nick-in { width:130px; font-family:'Gowun Batang', serif; font-size:14px; font-weight:700; color:#eeeae1; background:transparent; border:none; border-bottom:1px dashed #3a352e; padding:1px 2px; outline:none; }
+  .stepper { display:inline-flex; align-items:center; gap:2px; background:#131311; border:1px solid #33302a; border-radius:999px; padding:2px; }
+  .step-b { width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-family:inherit; font-size:15px; font-weight:600; line-height:1; color:#a9a49b; background:transparent; border:none; border-radius:50%; padding:0; }
+  .step-b:hover { color:#fffaf0; background:#b91c1c; }
+  .step-v { min-width:26px; text-align:center; font-size:13px; font-weight:700; color:#eeeae1; font-variant-numeric:tabular-nums; }
+  .step-u { font-size:11.5px; color:#807b73; padding-right:4px; }
+  .nick-wrap { position:relative; display:inline-flex; }
+  .nick-ghost { font-family:'Gowun Batang', serif; font-size:15px; font-weight:700; white-space:pre; visibility:hidden; padding:1px 8px; }
+  .nick-in { position:absolute; inset:0; width:100%; font-family:'Gowun Batang', serif; font-size:15px; font-weight:700; text-align:center; color:#eeeae1; background:transparent; border:none; border-bottom:1px dashed #3a352e; padding:1px 8px; outline:none; box-sizing:border-box; }
   .nick-in:focus { border-bottom-color:#b91c1c; }
   .nick-in::placeholder { color:#5f5b54; font-weight:400; }
   .goal-track { height:8px; background:#26241f; border-radius:999px; overflow:hidden; }
@@ -254,7 +259,10 @@
       <div style="display:flex; flex-direction:column; gap:3px">
         <div style="font-family:'Gowun Batang', serif; font-size:26px; font-weight:700; letter-spacing:-.5px">도깨비 공부방</div>
         <div style="display:flex; align-items:center; gap:7px">
-          <input class="nick-in" id="nickInput" placeholder="닉네임" maxlength="16" />
+          <span class="nick-wrap">
+            <span class="nick-ghost" id="nickGhost">닉네임</span>
+            <input class="nick-in" id="nickInput" placeholder="닉네임" maxlength="16" />
+          </span>
           <div style="font-size:11.5px; color:#5f5b54" id="userLabel"></div>
         </div>
       </div>
@@ -282,9 +290,13 @@
     </div>
     <div style="width:100%; max-width:520px; display:flex; flex-direction:column; gap:8px">
       <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#807b73; font-weight:500">
-        <span style="display:flex; align-items:center; gap:6px">오늘 목표
-          <input class="mini-in" id="goalInput" type="number" min="1" max="16" step="0.5" />
-          <span>시간</span>
+        <span style="display:flex; align-items:center; gap:8px">오늘 목표
+          <span class="stepper">
+            <button class="step-b" id="goalDown" aria-label="줄이기">−</button>
+            <span class="step-v" id="goalVal">4</span>
+            <span class="step-u">시간</span>
+            <button class="step-b" id="goalUp" aria-label="늘리기">+</button>
+          </span>
         </span><span id="goalText"></span>
       </div>
       <div class="goal-track"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
@@ -833,12 +845,15 @@ $("studyStop").onclick = () => $("stopBtn").onclick();
 
 $("subjInput").oninput = () => { state.subject = $("subjInput").value; render(); };
 
-$("nickInput").oninput = () => { nickname = $("nickInput").value; saveLocal(); };
+$("nickInput").oninput = () => { nickname = $("nickInput").value; $("nickGhost").textContent = nickname || "닉네임"; saveLocal(); };
 
-$("goalInput").oninput = () => {
-  const v = parseFloat($("goalInput").value);
-  if (!isNaN(v) && v > 0 && v <= 24) { GOAL_HOURS = v; saveLocal(); render(); }
-};
+function setGoal(v) {
+  GOAL_HOURS = Math.min(24, Math.max(0.5, Math.round(v * 2) / 2));
+  saveLocal();
+  render();
+}
+$("goalDown").onclick = () => setGoal(GOAL_HOURS - 0.5);
+$("goalUp").onclick = () => setGoal(GOAL_HOURS + 0.5);
 
 function resume(name) {
   if (state.status === "running") return;
@@ -937,7 +952,8 @@ function render() {
 
   $("userLabel").textContent = state.user.email;
   if (document.activeElement !== $("nickInput")) $("nickInput").value = nickname;
-  if (document.activeElement !== $("goalInput")) $("goalInput").value = GOAL_HOURS;
+  $("nickGhost").textContent = nickname || "닉네임";
+  $("goalVal").textContent = GOAL_HOURS;
   $("sessionLabel").textContent = fmt(state.elapsed);
   $("statusText").textContent = state.status === "running" ? name + " 감시 중" : state.status === "paused" ? "잠시 멈춤" : "대기 중";
   $("subjInput").disabled = state.status === "running";
