@@ -1136,7 +1136,7 @@ function renderFriends() {
     const top = ahead[ahead.length - 1];
     const gap = fmtShort(top.today - me.today);
     $("frNote").textContent = ahead.length === 1
-      ? top.nickname + "이(가) 너보다 " + gap + " 더 했다. 도깨비가 지켜본다."
+      ? top.nickname + "이(가) 너보다 " + gap + " 더 했다. 본 도깨비는 실망했다."
       : ahead.length + "명이 너보다 앞서 있다. 방망이 들 준비를 해야 하나?";
     $("frNote").classList.remove("hide");
   } else if (all.length > 1) {
