@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도깨비 공부방</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#131311; color:#eeeae1; font-family:'IBM Plex Sans KR', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  button { font-family: inherit; cursor: pointer; }
+  a { color:#f0776c; text-decoration:none; }
+  a:hover { color:#ff9a90; text-decoration:underline; }
+  .hide { display: none !important; }
+
+  @keyframes dk-bob { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-9px) rotate(1.5deg)} }
+  @keyframes dk-wiggle { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-7px,1px) rotate(-5deg)} 45%{transform:translate(6px,-3px) rotate(5deg)} 70%{transform:translate(-4px,2px) rotate(-3deg)} }
+  @keyframes dk-in { from{opacity:0; transform:scale(.93)} to{opacity:1; transform:scale(1)} }
+  @keyframes dk-pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+  /* 로그인 화면 */
+  #login { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; padding:48px 24px; background:radial-gradient(120% 90% at 50% 0%, #1f1d19 0%, #131311 62%); }
+  .title-big { font-family:'Gowun Batang', serif; font-size:44px; font-weight:700; letter-spacing:-1px; }
+  .lede { font-size:15px; color:#9b968c; line-height:1.75; max-width:420px; text-align:center; }
+  .g-btn { display:flex; align-items:center; gap:12px; font-size:15.5px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:999px; padding:15px 28px; }
+  .g-btn:hover { background:#fff; }
+  .g-mark { width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid #ddd7cb; display:flex; align-items:center; justify-content:center; font-family:'Gowun Batang', serif; font-size:14px; font-weight:700; color:#b91c1c; }
+
+  /* 도깨비 */
+  .dk { position:relative; flex:none; }
+  .dk-hero { width:200px; height:172px; animation:dk-bob 3.4s ease-in-out infinite; }
+  .dk-big { width:236px; height:200px; animation:dk-wiggle .55s ease-in-out 2; }
+  .horn { position:absolute; background:#f3e4c8; }
+  .hood { position:absolute; background:#b91c1c; border-radius:50% 50% 40% 40%; box-shadow:inset 0 -14px 26px rgba(0,0,0,.2); }
+  .face { position:absolute; background:#f3e4c8; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .eye { background:#2b1410; border-radius:50%; }
+  .cheek { position:absolute; background:#f2a08e; border-radius:50%; opacity:.9; }
+  .club { position:absolute; background:#8a5a34; z-index:0; }
+  .knob { position:absolute; background:#a3703f; border-radius:50%; }
+  .sleeve { position:absolute; background:#b91c1c; z-index:2; }
+  .mitt { position:absolute; background:#f3e4c8; border-radius:50%; z-index:3; }
+
+  /* 대시보드 */
+  #app { min-height:100vh; padding:40px 24px 90px; display:flex; flex-direction:column; align-items:center; gap:26px; }
+  .wrap { width:100%; max-width:900px; }
+  .head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; border-bottom:1px solid #2b2823; padding-bottom:18px; flex-wrap:wrap; }
+  .card { background:#1a1917; border:1px solid #2b2823; border-radius:20px; }
+  .pill { display:flex; align-items:center; gap:9px; padding:8px 14px; border:1px solid #2b2823; border-radius:999px; background:#1a1917; white-space:nowrap; font-size:12.5px; font-weight:600; color:#cfcac1; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#f0776c; animation:dk-pulse 1.6s ease-in-out infinite; }
+  .ghost { font-size:12.5px; font-weight:500; color:#807b73; background:transparent; border:1px solid #2b2823; border-radius:999px; padding:9px 14px; }
+  .ghost:hover { color:#eeeae1; border-color:#4a453e; }
+  .timer { font-size:92px; font-weight:600; line-height:1; letter-spacing:-3px; font-variant-numeric:tabular-nums; }
+  .btn-red { font-size:16px; font-weight:600; color:#fffaf0; background:#b91c1c; border:none; border-radius:999px; padding:15px 36px; }
+  .btn-red:hover { background:#d32626; }
+  .btn-line { font-size:16px; font-weight:600; color:#eeeae1; background:transparent; border:1.5px solid #4a453e; border-radius:999px; padding:15px 30px; }
+  .btn-line:hover { border-color:#eeeae1; }
+  .btn-green { font-size:16px; font-weight:600; color:#8fd6c4; background:transparent; border:1.5px solid #2f5f55; border-radius:999px; padding:15px 30px; }
+  .btn-green:hover { background:#2f5f55; color:#fffaf0; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(196px, 1fr)); gap:14px; }
+  .stat { background:#1a1917; border:1px solid #2b2823; border-radius:16px; padding:22px; display:flex; flex-direction:column; gap:9px; }
+  .stat-k { font-size:12.5px; color:#807b73; font-weight:600; }
+  .stat-v { font-size:29px; font-weight:600; letter-spacing:-1px; font-variant-numeric:tabular-nums; }
+  .bars { display:flex; align-items:flex-end; gap:10px; height:132px; }
+  .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:9px; height:100%; justify-content:flex-end; }
+  .bar { width:100%; min-height:3px; background:#b91c1c; border-radius:6px 6px 0 0; transition:height .4s ease; }
+  .row { display:grid; grid-template-columns:1.4fr 1fr .8fr .8fr; gap:12px; padding:13px 4px; border-top:1px solid #26241f; font-size:14.5px; align-items:center; }
+  .row-h { display:grid; grid-template-columns:1.4fr 1fr .8fr .8fr; gap:12px; padding:0 4px 10px; font-size:12px; color:#807b73; font-weight:600; }
+  .goal-track { height:8px; background:#26241f; border-radius:999px; overflow:hidden; }
+  .goal-fill { height:100%; background:#8fd6c4; border-radius:999px; transition:width .4s ease; }
+
+  /* 경고 화면 */
+  #alert { position:fixed; inset:0; background:rgba(12,10,9,.985); backdrop-filter:blur(8px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:40px; animation:dk-in .18s ease-out; }
+  .anger { font-family:'Gowun Batang', serif; font-size:50px; font-weight:700; color:#f7efe0; text-align:center; letter-spacing:-1px; line-height:1.15; }
+  .anger-sub { font-size:16.5px; color:#b3ada2; text-align:center; max-width:520px; line-height:1.65; }
+
+  @media (max-width: 560px) {
+    .title-big { font-size:34px; }
+    .timer { font-size:64px; letter-spacing:-2px; }
+    .anger { font-size:34px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 로그인 화면 ================= -->
+<div id="login">
+  <div class="dk dk-hero">
+    <div class="club" style="left:170px; top:38px; width:22px; height:116px; border-radius:11px; transform:rotate(12deg)">
+      <div class="knob" style="left:-6px; top:12px; width:15px; height:15px"></div>
+      <div class="knob" style="right:-6px; top:34px; width:14px; height:14px"></div>
+      <div class="knob" style="left:-5px; top:88px; width:13px; height:13px"></div>
+    </div>
+    <div class="sleeve" style="left:140px; top:92px; width:42px; height:19px; border-radius:10px; transform:rotate(-12deg)"></div>
+    <div class="mitt" style="left:168px; top:80px; width:26px; height:26px"></div>
+    <div class="horn" style="left:46px; top:0; width:28px; height:28px; border-radius:16px 5px 16px 16px; transform:rotate(-20deg)"></div>
+    <div class="horn" style="left:104px; top:0; width:28px; height:28px; border-radius:5px 16px 16px 16px; transform:rotate(20deg)"></div>
+    <div class="hood" style="left:18px; top:18px; width:142px; height:150px">
+      <div class="face" style="left:19px; top:16px; right:19px; bottom:34px; gap:8px">
+        <div style="display:flex; gap:17px">
+          <div class="eye" style="width:12px; height:12px"></div>
+          <div class="eye" style="width:12px; height:12px"></div>
+        </div>
+        <div style="width:20px; height:11px; background:#2b1410; border-radius:0 0 12px 12px"></div>
+        <div class="cheek" style="left:6px; top:44px; width:15px; height:9px"></div>
+        <div class="cheek" style="right:6px; top:44px; width:15px; height:9px"></div>
+      </div>
+      <div style="position:absolute; left:34px; right:34px; bottom:12px; height:12px; background:#8f1414; border-radius:8px"></div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; align-items:center; gap:12px">
+    <div class="title-big">도깨비 공부방</div>
+    <div class="lede">인강 틀어놓고 딴 창으로 도망가면 도깨비가 알아챈다.<br>공부 시간과 딴짓 횟수를 대신 세어 준다.</div>
+  </div>
+
+  <button class="g-btn" id="signInBtn"><span class="g-mark">G</span>Google 계정으로 시작하기</button>
+  <div style="font-size:12.5px; color:#6f6b64">기록은 계정에 저장되어 다른 기기에서도 이어진다.</div>
+</div>
+
+<!-- ================= 대시보드 ================= -->
+<div id="app" class="hide">
+  <div class="wrap head">
+    <div style="display:flex; align-items:center; gap:14px">
+      <div class="dk" style="width:52px; height:48px">
+        <div class="club" style="left:38px; top:9px; width:8px; height:32px; border-radius:4px; transform:rotate(12deg)"></div>
+        <div class="sleeve" style="left:32px; top:27px; width:15px; height:8px; border-radius:4px; transform:rotate(-12deg)"></div>
+        <div class="mitt" style="left:37px; top:23px; width:11px; height:11px"></div>
+        <div class="horn" style="left:11px; top:0; width:10px; height:10px; border-radius:6px 2px 6px 6px; transform:rotate(-20deg)"></div>
+        <div class="horn" style="left:26px; top:0; width:10px; height:10px; border-radius:2px 6px 6px 6px; transform:rotate(20deg)"></div>
+        <div class="hood" style="left:5px; top:6px; width:40px; height:42px; box-shadow:none">
+          <div class="face" style="left:6px; top:5px; right:6px; bottom:10px; flex-direction:row; gap:5px">
+            <div class="eye" style="width:5px; height:5px"></div>
+            <div class="eye" style="width:5px; height:5px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:3px">
+        <div style="font-family:'Gowun Batang', serif; font-size:26px; font-weight:700; letter-spacing:-.5px">도깨비 공부방</div>
+        <div style="font-size:12.5px; color:#807b73" id="userLabel"></div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px">
+      <div class="pill"><span class="dot"></span><span id="statusText">대기 중</span></div>
+      <button class="ghost" id="signOutBtn">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="wrap card" style="padding:38px 32px; display:flex; flex-direction:column; align-items:center; gap:26px">
+    <div style="font-size:12px; letter-spacing:2.5px; color:#807b73; font-weight:600">이번 세션</div>
+    <div class="timer" id="sessionLabel">00:00:00</div>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <button class="btn-red" id="startBtn">공부 시작</button>
+      <button class="btn-line hide" id="pauseBtn">공부 중지</button>
+      <button class="btn-green hide" id="stopBtn">공부 종료</button>
+    </div>
+    <div style="width:100%; max-width:520px; display:flex; flex-direction:column; gap:8px">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#807b73; font-weight:500">
+        <span>오늘 목표</span><span id="goalText"></span>
+      </div>
+      <div class="goal-track"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="wrap stats">
+    <div class="stat"><div class="stat-k">오늘 총 공부시간</div><div class="stat-v" id="todayLabel">0분</div></div>
+    <div class="stat"><div class="stat-k">오늘 딴짓 횟수</div><div class="stat-v" id="distLabel" style="color:#f0776c">0회</div></div>
+    <div class="stat"><div class="stat-k">연속 집중 최고</div><div class="stat-v" id="bestLabel">0분</div></div>
+    <div class="stat"><div class="stat-k">오늘 세션 수</div><div class="stat-v" id="sessLabel">0개</div></div>
+  </div>
+
+  <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:24px">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px">
+      <div style="font-family:'Gowun Batang', serif; font-size:21px; font-weight:700">공부 기록</div>
+      <div style="font-size:12.5px; color:#807b73">최근 7일</div>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div style="display:flex; flex-direction:column">
+      <div class="row-h"><div>날짜</div><div>공부시간</div><div>딴짓</div><div>세션</div></div>
+      <div id="logRows"></div>
+    </div>
+  </div>
+
+  <div class="wrap" style="font-size:12.5px; color:#6f6b64; line-height:1.8">
+    공부 중에 다른 창을 보다가 이 창으로 돌아오면 도깨비가 나타나고 딴짓 1회로 기록된다. 잠깐 쉴 때는 <strong style="color:#a9a49b; font-weight:600">공부 중지</strong>를 누르면 세지 않는다.
+  </div>
+</div>
+
+<!-- ================= 경고 화면 ================= -->
+<div id="alert" class="hide">
+  <div class="dk dk-big" id="alertDk">
+    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
+      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
+      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
+      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
+    </div>
+    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
+    <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
+    <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
+    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:9px">
+        <div style="display:flex; gap:19px">
+          <div class="eye" style="width:14px; height:14px"></div>
+          <div class="eye" style="width:14px; height:14px"></div>
+        </div>
+        <div style="width:30px; height:20px; background:#2b1410; border-radius:5px 5px 16px 16px; display:flex; justify-content:center; gap:4px; padding-top:2px">
+          <div style="width:7px; height:8px; background:#fffaf0; border-radius:0 0 3px 3px"></div>
+          <div style="width:7px; height:8px; background:#fffaf0; border-radius:0 0 3px 3px"></div>
+        </div>
+        <div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div>
+        <div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>
+      </div>
+      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px"></div>
+    </div>
+  </div>
+  <div class="anger" id="angerLine"></div>
+  <div class="anger-sub" id="angerSub"></div>
+  <div style="display:flex; align-items:center; gap:13px; padding:11px 22px; border:1px solid #3a352e; border-radius:999px">
+    <span style="font-size:12.5px; color:#8b857b; font-weight:600">오늘 딴짓</span>
+    <span style="font-family:'Gowun Batang', serif; font-size:29px; font-weight:700; color:#f0776c" id="alertCount">0</span>
+    <span style="font-size:12.5px; color:#8b857b">회</span>
+  </div>
+  <button class="g-btn" id="dismissBtn" style="margin-top:4px">미안, 다시 공부할게</button>
+</div>
+
+<!-- ================================================================
+     Supabase 연결 (설명서 2단계에서 받은 값을 넣으면 켜집니다)
+     비워두면 기록이 이 브라우저에만 저장됩니다.
+================================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "";       // 예: https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "";  // 예: eyJhbGciOi...
+
+const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+</script>
+
+<script>
+/* ---------------- 설정 ---------------- */
+const GOAL_HOURS = 4;      // 하루 목표 시간
+const GRACE_SECONDS = 3;   // 이 시간보다 짧게 나갔다 오면 안 셈
+const SOUND = true;        // 경고음
+const TONE = "귀엽게 툴툴";
+
+const LINES = {
+  "귀엽게 툴툴": [
+    ["앗! 또 나갔지", "나 혼자 강의 다 들었잖아. 억울해서 방망이에 적어놨어."],
+    ["어디 갔다 온 거야", "기다리는 동안 뿔이 한 개 더 자랄 뻔했어."],
+    ["딱 걸렸다!", "나 눈 두 개야. 화면도 너도 다 보고 있었어."],
+    ["흥, 또 알트탭", "방망이 흔들 힘도 아깝다. 앉아."]
+  ],
+  "구수한 사투리": [
+    ["야! 니 또 어디 갔다 왔노", "인강은 혼자 돌아가고 있드나. 도깨비가 다 봤다."],
+    ["어허, 손이 왜 저짝으로 가노", "한 번만 더 그카믄 방망이로 책상 두드린다."]
+  ],
+  "무섭고 짧은 호통": [
+    ["돌아왔군.", "나는 네가 나간 순간부터 세고 있었다."],
+    ["또.", "변명은 듣지 않는다. 화면으로 돌아가라."]
+  ]
+};
+
+const KEY = "dokkaebi-study-v1";
+const DAY_NAMES = ["일","월","화","수","목","금","토"];
+
+let state = { user: null, status: "idle", elapsed: 0, streak: 0, days: {} };
+let base = 0, startedAt = 0, streakFrom = 0, leftAt = null, actx = null;
+
+const $ = id => document.getElementById(id);
+
+/* ---------------- 시간 유틸 ---------------- */
+function dayKey(d) {
+  d = d || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function fmt(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  return [Math.floor(t / 3600), Math.floor((t % 3600) / 60), t % 60].map(v => String(v).padStart(2, "0")).join(":");
+}
+function fmtShort(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60);
+  return h > 0 ? h + "시간 " + m + "분" : m + "분";
+}
+function dayOf(key) {
+  return state.days[key] || { ms: 0, dist: 0, sessions: 0, best: 0 };
+}
+
+/* ---------------- 저장 / 불러오기 ---------------- */
+function saveLocal() {
+  try { localStorage.setItem(KEY, JSON.stringify({ days: state.days, user: state.user })); } catch (e) {}
+}
+function loadLocal() {
+  try {
+    const p = JSON.parse(localStorage.getItem(KEY) || "{}");
+    state.days = p.days || {};
+    if (!sb) state.user = p.user || null;
+  } catch (e) {}
+}
+
+async function saveDay(key) {
+  saveLocal();
+  if (!sb || !state.user) return;
+  const r = dayOf(key);
+  await sb.from("study_days").upsert({
+    user_id: state.user.id, day: key,
+    total_ms: r.ms, distractions: r.dist, sessions: r.sessions, best_ms: r.best
+  });
+}
+
+async function loadRemote() {
+  if (!sb || !state.user) return;
+  const { data } = await sb.from("study_days").select("*");
+  if (!data) return;
+  data.forEach(r => {
+    state.days[r.day] = { ms: r.total_ms || 0, dist: r.distractions || 0, sessions: r.sessions || 0, best: r.best_ms || 0 };
+  });
+  saveLocal();
+  render();
+}
+
+/* ---------------- 로그인 ---------------- */
+async function initAuth() {
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  if (data.session) {
+    const u = data.session.user;
+    state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
+    await loadRemote();
+  }
+  sb.auth.onAuthStateChange((_e, session) => {
+    if (session) {
+      const u = session.user;
+      state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
+      loadRemote();
+    } else {
+      state.user = null;
+    }
+    render();
+  });
+}
+
+$("signInBtn").onclick = async () => {
+  if (sb) {
+    await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin } });
+  } else {
+    // Supabase 값을 아직 안 넣었을 때: 이 브라우저에만 저장하며 사용
+    state.user = { id: "local", name: "공부하는 사람", email: "이 브라우저에 저장 중" };
+    saveLocal();
+    render();
+  }
+};
+
+$("signOutBtn").onclick = async () => {
+  if (sb) await sb.auth.signOut();
+  state.user = null;
+  state.status = "idle"; state.elapsed = 0; base = 0;
+  saveLocal();
+  render();
+};
+
+/* ---------------- 공부 버튼 ---------------- */
+$("startBtn").onclick = () => {
+  base = state.elapsed;
+  startedAt = Date.now();
+  streakFrom = Date.now();
+  leftAt = null;
+  state.status = "running";
+  render();
+};
+
+$("pauseBtn").onclick = () => {
+  if (state.status !== "running") return;
+  base = state.elapsed;
+  leftAt = null;
+  state.status = "paused";
+  state.streak = 0;
+  render();
+};
+
+$("stopBtn").onclick = () => {
+  const ms = state.elapsed;
+  const key = dayKey();
+  if (ms >= 1000) {
+    const d = dayOf(key);
+    state.days[key] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: Math.max(d.best, state.streak) };
+    saveDay(key);
+  }
+  base = 0; leftAt = null;
+  state.status = "idle"; state.elapsed = 0; state.streak = 0;
+  render();
+};
+
+$("dismissBtn").onclick = () => {
+  $("alert").classList.add("hide");
+  leftAt = null;
+  streakFrom = Date.now();
+};
+
+/* ---------------- 딴짓 감지 ---------------- */
+function away() { if (state.status === "running" && !leftAt) leftAt = Date.now(); }
+
+function back() {
+  if (state.status !== "running" || !leftAt) return;
+  const gone = Date.now() - leftAt;
+  leftAt = null;
+  if (gone < GRACE_SECONDS * 1000) return;
+  bump();
+}
+
+function bump() {
+  const key = dayKey();
+  const d = dayOf(key);
+  state.days[key] = { ms: d.ms, dist: d.dist + 1, sessions: d.sessions, best: Math.max(d.best, Date.now() - streakFrom) };
+  streakFrom = Date.now();
+  state.streak = 0;
+  saveDay(key);
+
+  const set = LINES[TONE] || LINES["귀엽게 툴툴"];
+  const line = set[Math.floor(Math.random() * set.length)];
+  $("angerLine").textContent = line[0];
+  $("angerSub").textContent = line[1];
+  $("alertCount").textContent = dayOf(key).dist;
+  const dk = $("alertDk");
+  dk.style.animation = "none";
+  void dk.offsetWidth;
+  dk.style.animation = "dk-wiggle .55s ease-in-out 2";
+  $("alert").classList.remove("hide");
+  if (SOUND) beep();
+  render();
+}
+
+function beep() {
+  try {
+    const A = window.AudioContext || window.webkitAudioContext;
+    if (!A) return;
+    actx = actx || new A();
+    const g = actx.createGain();
+    g.gain.value = 0.07;
+    g.connect(actx.destination);
+    [392, 294].forEach((f, i) => {
+      const o = actx.createOscillator();
+      o.type = "triangle";
+      o.frequency.value = f;
+      o.connect(g);
+      o.start(actx.currentTime + i * 0.17);
+      o.stop(actx.currentTime + i * 0.17 + 0.15);
+    });
+  } catch (e) {}
+}
+
+window.addEventListener("blur", away);
+window.addEventListener("focus", back);
+document.addEventListener("visibilitychange", () => document.hidden ? away() : back());
+
+/* ---------------- 화면 그리기 ---------------- */
+function render() {
+  const signedIn = !!state.user;
+  $("login").classList.toggle("hide", signedIn);
+  $("app").classList.toggle("hide", !signedIn);
+  if (!signedIn) return;
+
+  $("userLabel").textContent = state.user.name + " · " + state.user.email;
+  $("sessionLabel").textContent = fmt(state.elapsed);
+  $("statusText").textContent = state.status === "running" ? "감시 중" : state.status === "paused" ? "잠시 멈춤" : "대기 중";
+
+  $("startBtn").classList.toggle("hide", state.status === "running");
+  $("startBtn").textContent = state.status === "paused" ? "이어서 공부" : "공부 시작";
+  $("pauseBtn").classList.toggle("hide", state.status !== "running");
+  $("stopBtn").classList.toggle("hide", state.elapsed <= 0);
+
+  const key = dayKey();
+  const today = dayOf(key);
+  const totalToday = today.ms + (state.status === "idle" ? 0 : state.elapsed);
+  const pct = Math.min(100, Math.round(totalToday / (GOAL_HOURS * 3600000) * 100));
+
+  $("todayLabel").textContent = fmtShort(totalToday);
+  $("distLabel").textContent = today.dist + "회";
+  $("bestLabel").textContent = fmtShort(Math.max(today.best, state.streak));
+  $("sessLabel").textContent = today.sessions + "개";
+  $("goalText").textContent = fmtShort(totalToday) + " / " + GOAL_HOURS + "시간 (" + pct + "%)";
+  $("goalFill").style.width = pct + "%";
+
+  // 최근 7일 막대
+  const week = [];
+  let max = 1;
+  for (let i = 6; i >= 0; i--) {
+    const dt = new Date();
+    dt.setDate(dt.getDate() - i);
+    const k = dayKey(dt);
+    const ms = dayOf(k).ms + (k === key && state.status !== "idle" ? state.elapsed : 0);
+    max = Math.max(max, ms);
+    week.push({ day: DAY_NAMES[dt.getDay()], ms });
+  }
+  $("bars").innerHTML = week.map(w =>
+    '<div class="bar-col">' +
+      '<div style="font-size:11px; color:#807b73">' + (w.ms >= 60000 ? (w.ms / 3600000).toFixed(1) + "h" : "") + '</div>' +
+      '<div class="bar" style="height:' + Math.round(w.ms / max * 100) + '%"></div>' +
+      '<div style="font-size:12px; color:#a9a49b; font-weight:500">' + w.day + '</div>' +
+    '</div>'
+  ).join("");
+
+  // 날짜별 목록
+  const keys = Object.keys(state.days).sort().reverse().slice(0, 10);
+  if (!keys.length) {
+    $("logRows").innerHTML = '<div style="padding:26px 4px; border-top:1px solid #26241f; font-size:14px; color:#807b73">아직 기록이 없다. 공부 시작을 눌러라.</div>';
+  } else {
+    $("logRows").innerHTML = keys.map(k => {
+      const r = state.days[k];
+      const p = k.split("-");
+      return '<div class="row">' +
+        '<div style="font-weight:500">' + p[1] + "월 " + Number(p[2]) + "일" + '</div>' +
+        '<div>' + fmtShort(r.ms) + '</div>' +
+        '<div style="color:#f0776c; font-weight:600">' + r.dist + '회</div>' +
+        '<div style="color:#807b73">' + r.sessions + '개</div>' +
+      '</div>';
+    }).join("");
+  }
+}
+
+setInterval(() => {
+  if (state.status === "running") {
+    const now = Date.now();
+    state.elapsed = base + (now - startedAt);
+    state.streak = now - streakFrom;
+    render();
+  }
+}, 250);
+
+loadLocal();
+render();
+initAuth();
+</script>
+</body>
+</html>
