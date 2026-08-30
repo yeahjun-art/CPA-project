@@ -77,6 +77,8 @@
   .subj.on { border-color:#b91c1c; }
   .subj-n { font-size:14px; font-weight:600; color:#eeeae1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .subj-t { font-size:24px; font-weight:600; letter-spacing:-.5px; color:#f0776c; font-variant-numeric:tabular-nums; }
+  .subj-top { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .subj-d { flex:none; font-size:11px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:3px 9px; white-space:nowrap; }
   .subj-m { font-size:11.5px; color:#807b73; }
   .hbars { display:flex; align-items:flex-end; gap:3px; height:104px; }
   .hcol { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
@@ -263,7 +265,7 @@
     <div class="stat"><div class="stat-k">오늘 총 공부시간</div><div class="stat-v" id="todayLabel">0분</div></div>
     <div class="stat"><div class="stat-k">오늘 딴짓 횟수</div><div class="stat-v" id="distLabel" style="color:#f0776c">0회</div></div>
     <div class="stat"><div class="stat-k">연속 집중 최고</div><div class="stat-v" id="bestLabel">0분</div></div>
-    <div class="stat"><div class="stat-k">오늘 세션 수</div><div class="stat-v" id="sessLabel">0개</div></div>
+    <div class="stat"><div class="stat-k">공부한 과목 수</div><div class="stat-v" id="sessLabel">0개</div></div>
   </div>
 
   <!-- 과목별 -->
@@ -499,11 +501,20 @@ function fmtShort(ms) {
   const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60);
   return h > 0 ? h + "시간 " + m + "분" : m + "분";
 }
+function normSubj(raw) {
+  const out = {};
+  Object.keys(raw || {}).forEach(n => {
+    const v = raw[n];
+    out[n] = (typeof v === "number") ? { ms: v, dist: 0 } : { ms: (v && v.ms) || 0, dist: (v && v.dist) || 0 };
+  });
+  return out;
+}
+
 function dayOf(key) {
   const d = state.days[key] || {};
   return {
     ms: d.ms || 0, dist: d.dist || 0, sessions: d.sessions || 0, best: d.best || 0,
-    subjects: d.subjects || {}, hours: d.hours || new Array(24).fill(0)
+    subjects: normSubj(d.subjects), hours: d.hours || new Array(24).fill(0)
   };
 }
 function curName() { return ($("subjInput").value || "").trim() || "공부"; }
@@ -619,7 +630,8 @@ $("stopBtn").onclick = () => {
   if (ms >= 1000) {
     const d = dayOf(key);
     const subjects = Object.assign({}, d.subjects);
-    subjects[name] = (subjects[name] || 0) + ms;
+    const prev = subjects[name] || { ms: 0, dist: 0 };
+    subjects[name] = { ms: prev.ms + ms, dist: prev.dist };
     state.days[key] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: Math.max(d.best, state.streak), subjects, hours: d.hours };
     saveDay(key);
   }
@@ -673,7 +685,11 @@ function back() {
 function bump() {
   const key = dayKey();
   const d = dayOf(key);
-  state.days[key] = { ms: d.ms, dist: d.dist + 1, sessions: d.sessions, best: Math.max(d.best, Date.now() - streakFrom), subjects: d.subjects, hours: d.hours };
+  const sname = curName();
+  const bSubj = Object.assign({}, d.subjects);
+  const bCur = bSubj[sname] || { ms: 0, dist: 0 };
+  bSubj[sname] = { ms: bCur.ms, dist: bCur.dist + 1 };
+  state.days[key] = { ms: d.ms, dist: d.dist + 1, sessions: d.sessions, best: Math.max(d.best, Date.now() - streakFrom), subjects: bSubj, hours: d.hours };
   streakFrom = Date.now();
   state.streak = 0;
   saveDay(key);
@@ -750,11 +766,12 @@ function render() {
   $("stopBtn").classList.toggle("hide", state.elapsed <= 0);
 
   // 과목별 누적
-  const subjTotal = {}, subjDays = {};
+  const subjTotal = {}, subjDays = {}, subjDist = {};
   Object.keys(state.days).forEach(k => {
     const d = dayOf(k);
     Object.keys(d.subjects).forEach(n => {
-      subjTotal[n] = (subjTotal[n] || 0) + d.subjects[n];
+      subjTotal[n] = (subjTotal[n] || 0) + d.subjects[n].ms;
+      subjDist[n] = (subjDist[n] || 0) + d.subjects[n].dist;
       subjDays[n] = (subjDays[n] || 0) + 1;
     });
   });
@@ -772,7 +789,10 @@ function render() {
       ? (state.status === "running" ? "지금 공부 중" : "멈춰 있음 · 이어서 시작")
       : (subjDays[n] || 0) + "일 공부함";
     return '<button class="subj' + (on ? " on" : "") + '" data-n="' + esc(n) + '">' +
-      '<div class="subj-n">' + esc(n) + '</div>' +
+      '<div class="subj-top">' +
+        '<div class="subj-n">' + esc(n) + '</div>' +
+        '<div class="subj-d">딴짓 ' + (subjDist[n] || 0) + '회</div>' +
+      '</div>' +
       '<div class="subj-t">' + fmtShort(subjTotal[n]) + '</div>' +
       '<div class="subj-m">' + meta + '</div>' +
     '</button>';
@@ -787,7 +807,7 @@ function render() {
   $("todayLabel").textContent = fmtShort(totalToday);
   $("distLabel").textContent = today.dist + "회";
   $("bestLabel").textContent = fmtShort(Math.max(today.best, state.streak));
-  $("sessLabel").textContent = today.sessions + "개";
+  $("sessLabel").textContent = names.length + "개";
   $("goalText").textContent = fmtShort(totalToday) + " / " + GOAL_HOURS + "시간 (" + pct + "%)";
   $("goalFill").style.width = pct + "%";
 
