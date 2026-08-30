@@ -115,6 +115,34 @@
   .nick-in { position:absolute; inset:0; width:100%; font-family:'Gowun Batang', serif; font-size:15px; font-weight:700; text-align:center; color:#eeeae1; background:transparent; border:none; border-bottom:1px dashed #3a352e; padding:1px 8px; outline:none; box-sizing:border-box; }
   .nick-in:focus { border-bottom-color:#b91c1c; }
   .nick-in::placeholder { color:#5f5b54; font-weight:400; }
+  .fr-in { flex:1; min-width:0; font-family:inherit; font-size:14px; color:#eeeae1; background:#131311; border:1px solid #33302a; border-radius:10px; padding:11px 14px; outline:none; }
+  .fr-in:focus { border-color:#b91c1c; }
+  .fr-btn { flex:none; font-family:inherit; font-size:13px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:10px; padding:11px 18px; }
+  .fr-btn:hover { background:#fff; }
+  .fr-btn:disabled { color:#6f6b64; background:#26241f; cursor:default; }
+  .fr-mini { font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; padding:7px 12px; border:1px solid #33302a; background:#1f1d1a; color:#c9c2b4; }
+  .fr-mini:hover { color:#f3e4c8; border-color:#6b5642; }
+  .fr-mini.go { background:#b91c1c; border-color:#b91c1c; color:#fffaf0; }
+  .fr-mini.go:hover { background:#d32626; }
+  .fr-row { display:grid; grid-template-columns:34px 1fr auto auto auto auto; gap:12px; align-items:center; padding:13px 6px; border-top:1px solid #26241f; font-size:14px; }
+  .fr-row.me { background:#1f1d1a; border-radius:10px; }
+  .fr-rank { font-family:'Gowun Batang', serif; font-size:18px; font-weight:700; text-align:center; color:#807b73; }
+  .fr-rank.top { color:#d9b23c; }
+  .fr-name { display:flex; align-items:center; gap:8px; min-width:0; }
+  .fr-nm { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .fr-live { flex:none; font-size:10.5px; font-weight:600; color:#8fd6c4; background:#17302c; border:1px solid #2f5f55; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+  .fr-club { flex:none; font-size:10.5px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+  .fr-c { font-size:13px; color:#a9a49b; font-variant-numeric:tabular-nums; text-align:right; min-width:56px; }
+  .fr-c.big { font-size:15px; font-weight:600; color:#eeeae1; }
+  .fr-head { display:grid; grid-template-columns:34px 1fr auto auto auto auto; gap:12px; padding:0 6px 8px; font-size:11.5px; color:#807b73; font-weight:600; }
+  .fr-head span:not(:nth-child(2)):not(:first-child) { text-align:right; min-width:56px; }
+  .fr-msg { font-size:12.5px; color:#f0776c; min-height:16px; }
+  .fr-pend { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; background:#131311; border:1px solid #33302a; border-radius:10px; }
+  .fr-note { font-family:'Gowun Batang', serif; font-size:17px; font-weight:700; color:#f3e4c8; line-height:1.5; }
+  @media (max-width: 620px) {
+    .fr-row, .fr-head { grid-template-columns:28px 1fr auto; }
+    .fr-row .fr-c.hide-sm, .fr-head span.hide-sm { display:none; }
+  }
   .goal-track { height:8px; background:#26241f; border-radius:999px; overflow:hidden; }
   .goal-fill { height:100%; background:#8fd6c4; border-radius:999px; transition:width .4s ease; }
   .m-track { height:9px; background:#26241f; border-radius:999px; overflow:hidden; }
@@ -331,6 +359,42 @@
   </div>
 
   <!-- 최근 7일 -->
+  <!-- 친구 -->
+  <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:20px">
+    <div class="sec-head">
+      <div class="sec-title">친구 공부 현황</div>
+      <div class="sec-note" id="frRange">오늘 · 이번 주</div>
+    </div>
+
+    <div id="frOff" style="font-size:14px; color:#807b73; line-height:1.8">친구 기능은 구글 로그인으로 들어왔을 때만 쓸 수 있다.</div>
+
+    <div id="frOn" class="hide" style="display:flex; flex-direction:column; gap:18px">
+      <div id="frNote" class="fr-note hide"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <div style="font-size:12px; letter-spacing:2px; color:#807b73; font-weight:600">친구 찾기</div>
+        <div style="display:flex; gap:8px">
+          <input class="fr-in" id="frSearch" placeholder="친구의 닉네임" autocomplete="off" />
+          <button class="fr-btn" id="frSearchBtn">찾기</button>
+        </div>
+        <div class="fr-msg" id="frMsg"></div>
+        <div id="frResults" style="display:flex; flex-direction:column; gap:8px"></div>
+      </div>
+
+      <div id="frPendWrap" class="hide" style="display:flex; flex-direction:column; gap:8px">
+        <div style="font-size:12px; letter-spacing:2px; color:#807b73; font-weight:600">받은 신청</div>
+        <div id="frPend" style="display:flex; flex-direction:column; gap:8px"></div>
+      </div>
+
+      <div style="display:flex; flex-direction:column">
+        <div class="fr-head">
+          <span></span><span>닉네임</span><span>오늘</span><span class="hide-sm">이번 주</span><span class="hide-sm">딴짓</span><span class="hide-sm">과목</span>
+        </div>
+        <div id="frRank"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:24px">
     <div class="sec-head">
       <div class="sec-title">최근 7일 공부 기록</div>
@@ -692,12 +756,14 @@ async function initAuth() {
     const u = data.session.user;
     state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
     await loadRemote();
+    await ensureProfile();
+    loadFriends();
   }
   sb.auth.onAuthStateChange((_e, session) => {
     if (session) {
       const u = session.user;
       state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
-      loadRemote();
+      loadRemote().then(() => ensureProfile()).then(() => loadFriends());
     } else {
       state.user = null;
     }
@@ -731,6 +797,7 @@ function beginRun() {
   leftAt = null;
   state.status = "running";
   state.subject = curName();
+  pushStatus("studying");
   watchIdx = Math.floor(Math.random() * WATCH.length);
   motiIdx = Math.floor(Math.random() * MOTI.length);
   saveLocal();
@@ -749,6 +816,7 @@ $("pauseBtn").onclick = () => {
   lastTick = null; leftAt = null;
   streakBase += Date.now() - streakFrom;
   state.status = "paused"; state.streak = streakBase;
+  pushStatus("idle");
   render();
 };
 
@@ -765,6 +833,7 @@ $("stopBtn").onclick = () => {
     saveDay(key);
   }
   base = 0; lastTick = null; leftAt = null; streakBase = 0;
+  pushStatus("idle");
   state.status = "idle"; state.elapsed = 0; state.streak = 0;
   render();
 };
@@ -843,9 +912,213 @@ $("begOk").onclick = () => {
 $("studyPause").onclick = () => $("pauseBtn").onclick();
 $("studyStop").onclick = () => $("stopBtn").onclick();
 
+/* ---------------- 친구 ---------------- */
+let friends = [], pending = [], myProfile = null, frLoaded = false;
+
+function isOnline() { return !!(sb && state.user && state.user.id !== "local"); }
+
+function weekKeys() {
+  const out = [];
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((dow + 6) % 7));
+  for (let i = 0; i < 7; i++) { const d = new Date(mon); d.setDate(mon.getDate() + i); out.push(dayKey(d)); }
+  return out;
+}
+
+async function ensureProfile() {
+  if (!isOnline()) return;
+  const { data } = await sb.from("profiles").select("*").eq("user_id", state.user.id).maybeSingle();
+  myProfile = data || null;
+  if (myProfile && myProfile.nickname && !nickname) {
+    nickname = myProfile.nickname;
+    saveLocal();
+    render();
+  }
+}
+
+async function saveNickname(nick) {
+  if (!isOnline()) return { ok: true };
+  const n = (nick || "").trim();
+  if (!n) return { ok: false, msg: "닉네임을 적어라." };
+  const { error } = await sb.from("profiles").upsert({ user_id: state.user.id, nickname: n });
+  if (error) return { ok: false, msg: error.code === "23505" ? "이미 쓰는 닉네임이다. 다른 이름을 골라라." : "저장하지 못했다." };
+  myProfile = { user_id: state.user.id, nickname: n };
+  return { ok: true };
+}
+
+async function pushStatus(st) {
+  if (!isOnline() || !myProfile) return;
+  try { await sb.from("profiles").update({ status: st, status_at: new Date().toISOString() }).eq("user_id", state.user.id); } catch (e) {}
+}
+
+async function loadFriends() {
+  if (!isOnline()) return;
+  const me = state.user.id;
+  const { data: rels } = await sb.from("friendships").select("*");
+  if (!rels) return;
+  const okIds = [], pendIds = [];
+  rels.forEach(r => {
+    if (r.status === "accepted") okIds.push(r.requester === me ? r.addressee : r.requester);
+    else if (r.status === "pending" && r.addressee === me) pendIds.push(r.requester);
+  });
+  const ids = okIds.concat(pendIds);
+  let profs = [];
+  if (ids.length) {
+    const { data } = await sb.from("profiles").select("*").in("user_id", ids);
+    profs = data || [];
+  }
+  const pMap = {};
+  profs.forEach(p => { pMap[p.user_id] = p; });
+
+  const wk = weekKeys();
+  let rows = [];
+  if (okIds.length) {
+    const { data } = await sb.from("study_days").select("*").in("user_id", okIds).in("day", wk.concat([dayKey()]));
+    rows = data || [];
+  }
+  const agg = {};
+  rows.forEach(r => {
+    const a = agg[r.user_id] || (agg[r.user_id] = { today: 0, week: 0, dist: 0, best: 0, subjects: 0 });
+    const sj = r.subjects || {};
+    const dsum = Object.keys(sj).reduce((t, n) => t + ((typeof sj[n] === "number") ? 0 : (sj[n].dist || 0)), 0);
+    if (wk.indexOf(r.day) >= 0) a.week += r.total_ms || 0;
+    if (r.day === dayKey()) {
+      a.today = r.total_ms || 0;
+      a.dist = dsum;
+      a.best = r.best_ms || 0;
+      a.subjects = Object.keys(sj).length;
+    }
+  });
+
+  friends = okIds.map(id => {
+    const p = pMap[id] || {};
+    const a = agg[id] || { today: 0, week: 0, dist: 0, best: 0, subjects: 0 };
+    const live = p.status === "studying" && p.status_at && (Date.now() - new Date(p.status_at).getTime() < 15 * 60 * 1000);
+    return { id, nickname: p.nickname || "이름 없음", live, ...a };
+  });
+  pending = pendIds.map(id => ({ id, nickname: (pMap[id] || {}).nickname || "이름 없음" }));
+  frLoaded = true;
+  renderFriends();
+}
+
+$("frSearchBtn").onclick = async () => {
+  if (!isOnline()) return;
+  const q = ($("frSearch").value || "").trim();
+  $("frResults").innerHTML = "";
+  if (!q) { $("frMsg").textContent = "닉네임을 적어라."; return; }
+  if (!myProfile) { $("frMsg").textContent = "먼저 왼쪽 위에 내 닉네임을 정해라."; return; }
+  $("frMsg").textContent = "";
+  const { data } = await sb.from("profiles").select("user_id, nickname").ilike("nickname", "%" + q + "%").limit(8);
+  const hits = (data || []).filter(p => p.user_id !== state.user.id && !friends.some(f => f.id === p.user_id));
+  if (!hits.length) { $("frMsg").textContent = "그런 닉네임은 없다."; return; }
+  $("frResults").innerHTML = hits.map(p =>
+    '<div class="fr-pend"><div class="fr-nm">' + esc(p.nickname) + '</div>' +
+    '<button class="fr-mini go" data-req="' + p.user_id + '">친구 신청</button></div>'
+  ).join("");
+  Array.prototype.forEach.call($("frResults").querySelectorAll("[data-req]"), b => {
+    b.onclick = async () => {
+      b.disabled = true;
+      const { error } = await sb.from("friendships").insert({ requester: state.user.id, addressee: b.getAttribute("data-req"), status: "pending" });
+      $("frMsg").textContent = error ? "이미 신청했거나 보낼 수 없다." : "신청을 보냈다. 상대가 수락하면 이어진다.";
+      b.textContent = error ? "실패" : "보냈다";
+    };
+  });
+};
+
+$("frSearch").onkeydown = e => { if (e.key === "Enter") $("frSearchBtn").onclick(); };
+
+function renderFriends() {
+  const online = isOnline();
+  $("frOff").classList.toggle("hide", online);
+  $("frOn").classList.toggle("hide", !online);
+  if (!online) return;
+
+  $("frPendWrap").classList.toggle("hide", pending.length === 0);
+  $("frPend").innerHTML = pending.map(p =>
+    '<div class="fr-pend"><div class="fr-nm">' + esc(p.nickname) + '</div>' +
+    '<div style="display:flex; gap:8px">' +
+      '<button class="fr-mini go" data-ok="' + p.id + '">수락</button>' +
+      '<button class="fr-mini" data-no="' + p.id + '">거절</button>' +
+    '</div></div>'
+  ).join("");
+  Array.prototype.forEach.call($("frPend").querySelectorAll("[data-ok]"), b => {
+    b.onclick = async () => {
+      await sb.from("friendships").update({ status: "accepted" }).eq("requester", b.getAttribute("data-ok")).eq("addressee", state.user.id);
+      loadFriends();
+    };
+  });
+  Array.prototype.forEach.call($("frPend").querySelectorAll("[data-no]"), b => {
+    b.onclick = async () => {
+      await sb.from("friendships").delete().eq("requester", b.getAttribute("data-no")).eq("addressee", state.user.id);
+      loadFriends();
+    };
+  });
+
+  const today = dayOf(dayKey());
+  const live = state.status === "running" ? state.elapsed : 0;
+  const wk = weekKeys();
+  let myWeek = 0;
+  wk.forEach(k => { myWeek += dayOf(k).ms + (k === dayKey() ? live : 0); });
+  const myDist = Object.keys(today.subjects).reduce((t, n) => t + today.subjects[n].dist, 0);
+  const all = friends.concat([{
+    id: "me", nickname: nickname || "나", live: state.status === "running",
+    today: today.ms + live, week: myWeek, dist: myDist,
+    best: Math.max(today.best, streakNow()), subjects: Object.keys(today.subjects).length, isMe: true
+  }]);
+  all.sort((a, b) => b.today - a.today);
+
+  let maxDist = 0;
+  all.forEach(r => { maxDist = Math.max(maxDist, r.dist); });
+
+  if (all.length === 1) {
+    $("frRank").innerHTML = '<div style="padding:24px 6px; border-top:1px solid #26241f; font-size:14px; color:#807b73">아직 친구가 없다. 위에서 닉네임으로 찾아 신청해라.</div>';
+  } else {
+    $("frRank").innerHTML = all.map((r, i) =>
+      '<div class="fr-row' + (r.isMe ? " me" : "") + '">' +
+        '<div class="fr-rank' + (i === 0 ? " top" : "") + '">' + (i + 1) + '</div>' +
+        '<div class="fr-name">' +
+          '<div class="fr-nm">' + esc(r.nickname) + (r.isMe ? " (나)" : "") + '</div>' +
+          (r.live ? '<div class="fr-live">지금 공부 중</div>' : "") +
+          (maxDist > 0 && r.dist === maxDist ? '<div class="fr-club">방망이</div>' : "") +
+        '</div>' +
+        '<div class="fr-c big">' + fmtShort(r.today) + '</div>' +
+        '<div class="fr-c hide-sm">' + fmtShort(r.week) + '</div>' +
+        '<div class="fr-c hide-sm">' + r.dist + '회</div>' +
+        '<div class="fr-c hide-sm">' + r.subjects + '개</div>' +
+      '</div>'
+    ).join("");
+  }
+
+  const me = all.find(r => r.isMe);
+  const ahead = all.filter(r => !r.isMe && r.today > me.today);
+  if (ahead.length) {
+    const top = ahead[ahead.length - 1];
+    const gap = fmtShort(top.today - me.today);
+    $("frNote").textContent = ahead.length === 1
+      ? top.nickname + "이(가) 너보다 " + gap + " 더 했다. 도깨비가 지켜본다."
+      : ahead.length + "명이 너보다 앞서 있다. 방망이 들 준비를 해야 하나?";
+    $("frNote").classList.remove("hide");
+  } else if (all.length > 1) {
+    $("frNote").textContent = "오늘은 네가 1위다. 도깨비도 놀랐다.";
+    $("frNote").classList.remove("hide");
+  } else {
+    $("frNote").classList.add("hide");
+  }
+}
+
+setInterval(() => { if (isOnline() && frLoaded) loadFriends(); }, 90000);
+
 $("subjInput").oninput = () => { state.subject = $("subjInput").value; render(); };
 
 $("nickInput").oninput = () => { nickname = $("nickInput").value; $("nickGhost").textContent = nickname || "닉네임"; saveLocal(); };
+
+$("nickInput").onchange = async () => {
+  const r = await saveNickname(nickname);
+  if (!r.ok) { $("frMsg").textContent = r.msg; return; }
+  $("frMsg").textContent = "";
+  loadFriends();
+};
 
 function setGoal(v) {
   GOAL_HOURS = Math.min(24, Math.max(0.5, Math.round(v * 2) / 2));
@@ -1035,6 +1308,7 @@ function render() {
   $("sessLabel").textContent = names.length + "개";
   $("goalText").textContent = fmtShort(totalToday) + " / " + GOAL_HOURS + "시간 (" + pct + "%)";
   $("goalFill").style.width = pct + "%";
+  renderFriends();
 
   // 시간별
   const hArr = today.hours;
