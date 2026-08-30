@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const sb = supabase.createClient(
+    "https://dyfrhouqmsgolzkqtexp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZnJob3VxbXNnb2x6a3F0ZXhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMjU0NDIsImV4cCI6MjEwMzYwMTQ0Mn0.DkSGSj_U9rQNMLpGEpK_TXmMMyMGlYm7eJ-qChl9vQM"
+  );
+
+  // 구글 로그인 버튼이 할 일
+  function signIn() {
+    sb.auth.signInWithOAuth({ provider: "google" });
+  }
+
+  // 오늘 기록 저장하기
+  async function saveDay(day, row) {
+    const { data } = await sb.auth.getUser();
+    await sb.from("study_days").upsert({
+      user_id: data.user.id, day, ...row
+    });
+  }
+
+  // 내 기록 전부 불러오기
+  async function loadDays() {
+    const { data } = await sb.from("study_days")
+      .select("*").order("day", { ascending: false });
+    return data;
+  }
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>도깨비 공부방</title>
