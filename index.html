@@ -80,6 +80,20 @@
   .subj-top { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .subj-d { flex:none; font-size:11px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:3px 9px; white-space:nowrap; }
   .subj-m { font-size:11.5px; color:#807b73; }
+  .subj-go { display:flex; flex-direction:column; gap:9px; background:transparent; border:none; padding:0; width:100%; text-align:left; font-family:inherit; color:inherit; cursor:pointer; }
+  .beg-btn { width:100%; font-family:inherit; font-size:12px; font-weight:600; color:#c9c2b4; background:#1f1d1a; border:1px solid #33302a; border-radius:9px; padding:8px 10px; margin-top:2px; }
+  .beg-btn:hover { color:#f3e4c8; border-color:#6b5642; background:#26241f; }
+  .beg-btn:disabled { opacity:.3; cursor:default; }
+  #beg { position:fixed; inset:0; background:rgba(12,10,9,.985); backdrop-filter:blur(8px); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:18px; padding:28px 24px; overflow-y:auto; animation:dk-in .18s ease-out; }
+  .bubble { position:relative; max-width:340px; background:#f6f2e9; color:#1f1d1a; font-family:'Gowun Batang', serif; font-size:20px; font-weight:700; line-height:1.4; border-radius:16px; padding:15px 22px; text-align:center; }
+  .bubble:after { content:""; position:absolute; left:50%; bottom:-11px; transform:translateX(-50%); border-left:11px solid transparent; border-right:11px solid transparent; border-top:12px solid #f6f2e9; }
+  .beg-line { max-width:600px; font-family:'Gowun Batang', serif; font-size:23px; font-weight:700; color:#f3e4c8; line-height:1.55; text-align:center; text-wrap:pretty; }
+  .beg-input { width:100%; max-width:600px; font-family:inherit; font-size:16px; color:#eeeae1; background:#131311; border:1px solid #33302a; border-radius:12px; padding:14px 16px; outline:none; }
+  .beg-input:focus { border-color:#b91c1c; }
+  .beg-ok { font-family:inherit; font-size:15.5px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:999px; padding:14px 30px; }
+  .beg-ok:disabled { color:#6f6b64; background:#26241f; cursor:default; }
+  .smile { width:36px; height:18px; background:#2b1410; border-radius:0 0 20px 20px; }
+  @media (max-height: 640px) { #beg .dk-study { transform:scale(.6); margin:-40px 0; } .beg-line { font-size:19px; } }
   .hbars { display:flex; align-items:flex-end; gap:3px; height:104px; }
   .hcol { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
   .hbar { width:100%; min-height:2px; border-radius:3px 3px 0 0; transition:height .4s ease; }
@@ -374,6 +388,43 @@
   <div style="font-size:12px; color:#6f6b64; text-align:center">이 두 개를 누르면 방금 센 딴짓 1회는 지워준다.</div>
 </div>
 
+<div id="beg" class="hide">
+  <div class="bubble">너의 진심을 보여줘봐.</div>
+  <div class="dk dk-study">
+    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
+      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
+      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
+      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
+    </div>
+    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
+    <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
+    <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
+    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:10px">
+        <div style="display:flex; gap:19px">
+          <div style="width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(9deg)"></div>
+          <div style="width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(-9deg)"></div>
+        </div>
+        <div class="smile"></div>
+        <div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div>
+        <div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>
+      </div>
+      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px"></div>
+    </div>
+  </div>
+
+  <div style="font-size:12px; letter-spacing:2.5px; color:#7a736a; font-weight:600" id="begSubj"></div>
+  <div class="beg-line" id="begLine"></div>
+  <div style="font-size:13px; color:#807b73">위 문장을 그대로 받아 적어라. 한 글자도 틀리면 안 된다.</div>
+  <input class="beg-input" id="begInput" placeholder="여기에 그대로 적어라" autocomplete="off" />
+  <div style="font-size:12.5px; color:#f0776c; min-height:17px" id="begMsg"></div>
+  <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center">
+    <button class="beg-ok" id="begOk" disabled>딴짓 1회 지우기</button>
+    <button class="pardon" id="begClose">그냥 나가기</button>
+  </div>
+</div>
+
 <!-- Supabase 연결: 설명서 2-5에서 받은 값을 넣으면 켜집니다. 비워두면 이 브라우저에만 저장됩니다. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -397,9 +448,7 @@ const LINES = {
     ["앗! 또 나갔지", "나 혼자 강의 다 들었잖아. 억울해서 방망이에 적어놨어."],
     ["어디 갔다 온 거야", "기다리는 동안 뿔이 한 개 더 자랄 뻔했어."],
     ["딱 걸렸다!", "나 눈 두 개야. 화면도 너도 다 보고 있었어."],
-    ["흥, 또 알트탭", "방망이 흔들 힘도 아깝다. 앉아."],
-    ["정신 못 차리고 또 주식 보지?", "인강만 보면 주식은 알아서 오른다."],
-    ["열심히 한다면서 벌써 포기야?", "넌 조금만 있으면 엉덩이에 뿔 나겠다."],
+    ["흥, 또 알트탭", "방망이 흔들 힘도 아깝다. 앉아."]
   ],
   "구수한 사투리": [
     ["야! 니 또 어디 갔다 왔노", "인강은 혼자 돌아가고 있드나. 도깨비가 다 봤다."],
@@ -474,6 +523,39 @@ const MOTI = [
   "책상에 앉은 시간이 곧 실력이다.",
   "지금 졸면 꿈에서도 강의 듣는다.",
   "끝까지 듣는 사람이 결국 붙는다."
+];
+
+const BEG = [
+  "앞으로는 강의가 끝날 때까지 알트탭에 손대지 않겠습니다.",
+  "도깨비님, 제 손가락이 잘못했습니다. 다시는 안 그러겠습니다.",
+  "이제부터 딴 창은 강의가 끝난 뒤에 열겠습니다.",
+  "제 눈은 오늘부터 화면 중앙에 고정하겠습니다.",
+  "딴짓 대신 필기를 하겠습니다. 진심입니다.",
+  "다음 딴짓 때는 방망이를 맞을 각오가 되어 있습니다.",
+  "이 강의를 끝까지 듣고 나서 쉬겠습니다. 약속합니다.",
+  "도깨비님의 뿔에 걸고 맹세합니다. 공부만 하겠습니다.",
+  "제 의지가 약했습니다. 앞으로는 튼튼하게 앉아 있겠습니다.",
+  "졸리면 서서 듣겠습니다. 눕지 않겠습니다.",
+  "딴 창을 열고 싶어질 때마다 이 문장을 떠올리겠습니다.",
+  "오늘 남은 시간은 전부 진도에 쓰겠습니다.",
+  "도깨비님이 지켜보는 동안 절대 도망가지 않겠습니다.",
+  "저는 합격을 위해 앉아 있는 사람입니다. 다시 집중하겠습니다.",
+  "방금의 딴짓은 제 잘못입니다. 그러나 다음 한 시간은 제 것입니다.",
+  "휴대폰은 손이 닿지 않는 곳에 두겠습니다.",
+  "재생 버튼을 누른 이상 끝까지 책임지겠습니다.",
+  "지금부터 딴짓 횟수를 0으로 만들어 보이겠습니다.",
+  "도깨비님, 한 번만 봐주십시오. 두 번은 부탁하지 않겠습니다.",
+  "제 미래는 이 화면 안에 있습니다. 눈을 떼지 않겠습니다.",
+  "쉬는 시간은 제가 정하지 않고 강의가 정하게 하겠습니다.",
+  "딴짓하려던 그 손으로 문제를 풀겠습니다.",
+  "오늘의 저를 내일의 제가 고맙게 여기도록 하겠습니다.",
+  "이번 장을 다 들을 때까지 자리에서 일어나지 않겠습니다.",
+  "도깨비님의 방망이보다 제 의지가 세다는 것을 보여드리겠습니다.",
+  "딴짓은 재미있었지만 성적은 재미없어집니다. 그만하겠습니다.",
+  "저는 지금 공부를 선택합니다. 다른 창은 선택하지 않습니다.",
+  "화면을 벗어나는 순간이 곧 시간을 버리는 순간임을 알겠습니다.",
+  "앞으로 한 시간, 도깨비님이 심심하도록 조용히 공부하겠습니다.",
+  "믿어주십시오. 이번에는 정말입니다."
 ];
 
 const KEY = "dokkaebi-study-v2";
@@ -661,6 +743,54 @@ $("dismissBtn").onclick = () => {
   lastTick = Date.now();
 };
 
+let begName = null, begLine = "";
+
+function normText(s) { return (s || "").replace(/\s+/g, " ").trim(); }
+
+function openBeg(n) {
+  begName = n;
+  begLine = BEG[Math.floor(Math.random() * BEG.length)];
+  $("begSubj").textContent = n;
+  $("begLine").textContent = begLine;
+  $("begInput").value = "";
+  $("begMsg").textContent = "";
+  $("begOk").disabled = true;
+  $("beg").classList.remove("hide");
+  setTimeout(() => $("begInput").focus(), 80);
+}
+
+function closeBeg() { begName = null; $("beg").classList.add("hide"); }
+
+$("begClose").onclick = closeBeg;
+
+$("begInput").oninput = () => {
+  $("begOk").disabled = normText($("begInput").value) !== normText(begLine);
+  $("begMsg").textContent = "";
+};
+
+$("begInput").onkeydown = e => { if (e.key === "Enter" && !$("begOk").disabled) $("begOk").onclick(); };
+
+$("begOk").onclick = () => {
+  if (normText($("begInput").value) !== normText(begLine)) {
+    $("begMsg").textContent = "한 글자도 틀리면 안 된다. 다시 봐라.";
+    return;
+  }
+  const ks = Object.keys(state.days).sort().reverse();
+  for (const k of ks) {
+    const dd = dayOf(k);
+    const c = dd.subjects[begName];
+    if (c && c.dist > 0) {
+      const sj = Object.assign({}, dd.subjects);
+      sj[begName] = { ms: c.ms, dist: c.dist - 1 };
+      state.days[k] = { ms: dd.ms, dist: Math.max(0, dd.dist - 1), sessions: dd.sessions, best: dd.best, subjects: sj, hours: dd.hours };
+      saveDay(k);
+      break;
+    }
+  }
+  closeBeg();
+  render();
+};
+
 $("studyPause").onclick = () => $("pauseBtn").onclick();
 $("studyStop").onclick = () => $("stopBtn").onclick();
 
@@ -790,17 +920,24 @@ function render() {
     const meta = on
       ? (state.status === "running" ? "지금 공부 중" : "멈춰 있음 · 이어서 시작")
       : (subjDays[n] || 0) + "일 공부함";
-    return '<button class="subj' + (on ? " on" : "") + '" data-n="' + esc(n) + '">' +
-      '<div class="subj-top">' +
-        '<div class="subj-n">' + esc(n) + '</div>' +
-        '<div class="subj-d">딴짓 ' + (subjDist[n] || 0) + '회</div>' +
-      '</div>' +
-      '<div class="subj-t">' + fmtShort(subjTotal[n]) + '</div>' +
-      '<div class="subj-m">' + meta + '</div>' +
-    '</button>';
+    const dn = subjDist[n] || 0;
+    return '<div class="subj' + (on ? " on" : "") + '">' +
+      '<button class="subj-go" data-n="' + esc(n) + '">' +
+        '<div class="subj-top">' +
+          '<div class="subj-n">' + esc(n) + '</div>' +
+          '<div class="subj-d">딴짓 ' + dn + '회</div>' +
+        '</div>' +
+        '<div class="subj-t">' + fmtShort(subjTotal[n]) + '</div>' +
+        '<div class="subj-m">' + meta + '</div>' +
+      '</button>' +
+      '<button class="beg-btn" data-beg="' + esc(n) + '"' + (dn > 0 ? '' : ' disabled') + '>깨비님께 빌기</button>' +
+    '</div>';
   }).join("");
-  Array.prototype.forEach.call($("subjGrid").querySelectorAll(".subj"), b => {
+  Array.prototype.forEach.call($("subjGrid").querySelectorAll(".subj-go"), b => {
     b.onclick = () => resume(b.getAttribute("data-n"));
+  });
+  Array.prototype.forEach.call($("subjGrid").querySelectorAll(".beg-btn"), b => {
+    b.onclick = () => openBeg(b.getAttribute("data-beg"));
   });
 
   // 오늘 요약
