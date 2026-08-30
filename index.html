@@ -315,7 +315,7 @@
     <div style="display:flex; flex-wrap:wrap; gap:10px 16px" id="legend"></div>
     <div class="bars" id="bars"></div>
     <div style="display:flex; flex-direction:column">
-      <div class="row-h"><div>날짜</div><div>공부시간</div><div>딴짓</div><div>세션</div></div>
+      <div class="row-h"><div>날짜</div><div>공부시간</div><div>딴짓</div><div>과목</div></div>
       <div id="logRows"></div>
     </div>
   </div>
@@ -849,7 +849,8 @@ function bump() {
   const line = set[Math.floor(Math.random() * set.length)];
   $("angerLine").textContent = line[0];
   $("angerSub").textContent = line[1];
-  $("alertCount").textContent = dayOf(key).dist;
+  const ad = dayOf(key);
+  $("alertCount").textContent = Object.keys(ad.subjects).reduce((t, n) => t + ad.subjects[n].dist, 0);
   const dk = $("alertDk");
   dk.style.animation = "none";
   void dk.offsetWidth;
@@ -898,7 +899,7 @@ function render() {
     $("studyTimer").textContent = fmt(state.elapsed);
     const td = dayOf(dayKey());
     $("studyToday").textContent = "오늘 " + fmtShort(td.ms + state.elapsed);
-    $("studyDist").textContent = "딴짓 " + td.dist + "회";
+    $("studyDist").textContent = "딴짓 " + Object.keys(td.subjects).reduce((t, n) => t + td.subjects[n].dist, 0) + "회";
   }
 
   const key = dayKey();
@@ -982,7 +983,8 @@ function render() {
   const totalToday = today.ms + live;
   const pct = Math.min(100, Math.round(totalToday / (GOAL_HOURS * 3600000) * 100));
   $("todayLabel").textContent = fmtShort(totalToday);
-  $("distLabel").textContent = today.dist + "회";
+  const distSum = Object.keys(today.subjects).reduce((t, n) => t + today.subjects[n].dist, 0);
+  $("distLabel").textContent = distSum + "회";
   $("bestLabel").textContent = fmtShort(Math.max(today.best, state.streak));
   $("sessLabel").textContent = names.length + "개";
   $("goalText").textContent = fmtShort(totalToday) + " / " + GOAL_HOURS + "시간 (" + pct + "%)";
@@ -1051,8 +1053,8 @@ function render() {
       return '<div class="row">' +
         '<div style="font-weight:500">' + p[1] + "월 " + Number(p[2]) + "일" + '</div>' +
         '<div>' + fmtShort(ms) + '</div>' +
-        '<div style="color:#f0776c; font-weight:600">' + r.dist + '회</div>' +
-        '<div style="color:#807b73">' + r.sessions + '개</div>' +
+        '<div style="color:#f0776c; font-weight:600">' + Object.keys(r.subjects).reduce((t, n) => t + r.subjects[n].dist, 0) + '회</div>' +
+        '<div style="color:#807b73">' + Object.keys(r.subjects).length + '개</div>' +
       '</div>';
     }).join("");
   }
