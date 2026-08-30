@@ -933,13 +933,26 @@ async function ensureProfile() {
   if (myProfile && myProfile.nickname) {
     nickname = myProfile.nickname;
     saveLocal();
-  } else if (nickname && nickname.trim().length >= 2) {
-    await saveNickname(nickname);
+    if (!myProfile.code) await grantCode();
+  } else {
+    const n = (nickname || "").trim();
+    const r = await saveNickname(n.length >= 2 ? n : "깨비" + newCode());
+    if (r.ok && myProfile) { nickname = myProfile.nickname; saveLocal(); }
   }
   render();
 }
 
 function newCode() { return String(Math.floor(10000 + Math.random() * 90000)); }
+
+async function grantCode() {
+  if (!isOnline() || !myProfile) return;
+  for (let i = 0; i < 8; i++) {
+    const c = newCode();
+    const { error } = await sb.from("profiles").update({ code: c }).eq("user_id", state.user.id);
+    if (!error) { myProfile.code = c; return; }
+    if (error.code !== "23505") return;
+  }
+}
 
 async function saveNickname(nick) {
   if (!isOnline()) return { ok: true };
@@ -1240,7 +1253,6 @@ function render() {
   const live = state.status === "idle" ? 0 : state.elapsed;
   const name = curName();
 
-  $("userLabel").textContent = state.user.email;
   if (document.activeElement !== $("nickInput")) $("nickInput").value = nickname;
   $("nickGhost").textContent = nickname || "닉네임";
   $("myCode").textContent = (myProfile && myProfile.code) ? "#" + myProfile.code : "";
