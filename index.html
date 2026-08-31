@@ -291,11 +291,7 @@
   </div>
 
   <div class="dk dk-study">
-    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
-      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
-      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
-      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
-    </div>
+    <div id="studyItem" style="position:absolute; left:170px; top:14px; width:72px; height:160px; z-index:0"></div>
     <div class="sleeve" id="studySleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
@@ -548,11 +544,7 @@
 <!-- ================= 경고 화면 ================= -->
 <div id="alert" class="hide">
   <div class="dk dk-big" id="alertDk">
-    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
-      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
-      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
-      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
-    </div>
+    <div id="alertItem" style="position:absolute; left:170px; top:14px; width:72px; height:160px; z-index:0"></div>
     <div class="sleeve" id="alertSleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
@@ -602,11 +594,7 @@
 <div id="beg" class="hide">
   <div class="bubble">너의 진심을 보여줘봐.</div>
   <div class="dk dk-study">
-    <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
-      <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
-      <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
-      <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
-    </div>
+    <div id="begItem" style="position:absolute; left:170px; top:14px; width:72px; height:160px; z-index:0"></div>
     <div class="sleeve" id="begSleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
@@ -831,6 +819,37 @@ const FACE = {
   }
 };
 
+const ITEM = {
+  "귀엽게 툴툴":
+    '<div style="position:absolute; left:22px; top:26px; width:26px; height:130px; background:#8a5a34; border-radius:13px; transform:rotate(12deg)">' +
+      '<div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>' +
+      '<div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>' +
+      '<div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>' +
+    '</div>',
+  "구수한 사투리":
+    '<div style="position:absolute; left:26px; top:58px; width:15px; height:88px; background:#7a5029; border-radius:7px; transform:rotate(12deg)"></div>' +
+    '<div style="position:absolute; left:8px; top:12px; width:54px; height:74px; background:linear-gradient(150deg,#a4633f 0%,#6d3b21 78%); border-radius:56% 44% 48% 52% / 62% 58% 42% 38%; transform:rotate(14deg); box-shadow:inset -6px -8px 14px rgba(0,0,0,.28)">' +
+      '<div style="position:absolute; left:12px; top:14px; width:9px; height:5px; background:#5a2f18; border-radius:50%; opacity:.6"></div>' +
+      '<div style="position:absolute; right:14px; top:32px; width:8px; height:4px; background:#5a2f18; border-radius:50%; opacity:.6"></div>' +
+      '<div style="position:absolute; left:20px; top:48px; width:7px; height:4px; background:#5a2f18; border-radius:50%; opacity:.5"></div>' +
+      '<div style="position:absolute; left:-5px; top:26px; width:12px; height:9px; background:#8f5a37; border-radius:50% 0 50% 50%; transform:rotate(-18deg)"></div>' +
+    '</div>',
+  "무섭고 짧은 호통":
+    '<div style="position:absolute; left:26px; top:96px; width:16px; height:56px; background:#5e3a1c; border-radius:8px; transform:rotate(12deg)"></div>' +
+    '<div style="position:absolute; left:23px; top:92px; width:22px; height:9px; background:#3f2712; border-radius:5px; transform:rotate(12deg)"></div>' +
+    '<div style="position:absolute; left:18px; top:4px; width:32px; height:100px; background:linear-gradient(100deg,#e0b878 0%,#a97a3f 72%); border-radius:16px 16px 9px 9px; transform:rotate(12deg); box-shadow:inset -5px -6px 12px rgba(0,0,0,.22)">' +
+      '<div style="position:absolute; left:7px; top:14px; width:3px; height:66px; background:rgba(90,52,20,.35); border-radius:2px"></div>' +
+      '<div style="position:absolute; right:9px; top:22px; width:2px; height:54px; background:rgba(90,52,20,.3); border-radius:2px"></div>' +
+    '</div>',
+  "차갑고 사무적인 경고":
+    '<div style="position:absolute; left:27px; top:62px; width:14px; height:92px; background:linear-gradient(90deg,#9aa4b0 0%,#5a636e 60%,#8a939e 100%); border-radius:7px; transform:rotate(12deg)"></div>' +
+    '<div style="position:absolute; left:22px; top:88px; width:24px; height:8px; background:#3a424c; border-radius:4px; transform:rotate(12deg)"></div>' +
+    '<div style="position:absolute; left:14px; top:22px; width:40px; height:44px; border:5px solid #aab3bd; border-radius:50%; transform:rotate(12deg); box-shadow:0 0 14px rgba(120,200,255,.45)"></div>' +
+    '<div style="position:absolute; left:26px; top:34px; width:20px; height:20px; background:#8fe4ff; border-radius:50%; box-shadow:0 0 16px rgba(120,210,255,.9), 0 0 30px rgba(120,210,255,.5)"></div>' +
+    '<div style="position:absolute; left:6px; top:8px; width:12px; height:16px; background:#8fe4ff; clip-path:polygon(60% 0, 10% 58%, 45% 58%, 20% 100%, 90% 44%, 52% 44%); opacity:.95"></div>' +
+    '<div style="position:absolute; right:2px; top:52px; width:10px; height:14px; background:#8fe4ff; clip-path:polygon(60% 0, 10% 58%, 45% 58%, 20% 100%, 90% 44%, 52% 44%); opacity:.8"></div>'
+};
+
 const painted = {};
 function paintFace(faceId, hoodId, collarId, mode) {
   const sig = TONE + "|" + mode;
@@ -844,6 +863,8 @@ function paintFace(faceId, hoodId, collarId, mode) {
   if (collarId && $(collarId)) $(collarId).style.background = f.collar;
   const sl = $(faceId.replace("Face", "Sleeve"));
   if (sl) sl.style.background = f.hood;
+  const it = $(faceId.replace("Face", "Item"));
+  if (it) it.innerHTML = ITEM[TONE] || ITEM["귀엽게 툴툴"];
 }
 
 const KEY = "dokkaebi-study-v2";
