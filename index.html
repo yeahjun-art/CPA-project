@@ -88,6 +88,23 @@
   .subj-top { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .subj-d { flex:none; font-size:11px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:999px; padding:3px 9px; white-space:nowrap; }
   .subj-m { font-size:11.5px; color:#807b73; }
+  .dots { font-family:inherit; font-size:17px; line-height:1; color:#807b73; background:transparent; border:1px solid #33302a; border-radius:8px; padding:2px 9px 5px; }
+  .dots:hover { color:#eeeae1; border-color:#6b5642; }
+  .dots.on { color:#fffaf0; background:#b91c1c; border-color:#b91c1c; }
+  .menu { position:absolute; right:0; top:calc(100% + 6px); background:#26241f; border:1px solid #3a352e; border-radius:10px; padding:5px; z-index:50; white-space:nowrap; }
+  .menu-i { display:block; width:100%; font-family:inherit; font-size:13px; font-weight:500; color:#eeeae1; background:transparent; border:none; border-radius:7px; padding:9px 14px; text-align:left; }
+  .menu-i:hover { background:#3a352e; }
+  .del-b { width:100%; font-family:inherit; font-size:12px; font-weight:600; color:#f0776c; background:#2a1614; border:1px solid #45201c; border-radius:9px; padding:8px 10px; margin-top:2px; }
+  .del-b:hover { background:#b91c1c; border-color:#b91c1c; color:#fffaf0; }
+  #confirm { position:fixed; inset:0; background:rgba(12,10,9,.92); backdrop-filter:blur(6px); z-index:10001; display:flex; align-items:center; justify-content:center; padding:28px; }
+  .cf-box { max-width:420px; background:#1a1917; border:1px solid #3a352e; border-radius:18px; padding:30px 30px 26px; display:flex; flex-direction:column; gap:16px; align-items:center; text-align:center; }
+  .cf-t { font-family:'Gowun Batang', serif; font-size:23px; font-weight:700; color:#f3e4c8; line-height:1.45; }
+  .cf-s { font-size:13.5px; color:#a9a49b; line-height:1.6; }
+  .cf-row { display:flex; gap:10px; margin-top:4px; }
+  .cf-y { font-family:inherit; font-size:14.5px; font-weight:600; color:#fffaf0; background:#b91c1c; border:none; border-radius:999px; padding:12px 28px; }
+  .cf-y:hover { background:#d32626; }
+  .cf-n { font-family:inherit; font-size:14.5px; font-weight:600; color:#a9a49b; background:transparent; border:1px solid #3a352e; border-radius:999px; padding:12px 28px; }
+  .cf-n:hover { color:#f7efe0; border-color:#6b5642; }
   .subj-go { display:flex; flex-direction:column; gap:9px; background:transparent; border:none; padding:0; width:100%; text-align:left; font-family:inherit; color:inherit; cursor:pointer; }
   .beg-btn { width:100%; font-family:inherit; font-size:12px; font-weight:600; color:#c9c2b4; background:#1f1d1a; border:1px solid #33302a; border-radius:9px; padding:8px 10px; margin-top:2px; }
   .beg-btn:hover { color:#f3e4c8; border-color:#6b5642; background:#26241f; }
@@ -361,7 +378,15 @@
   <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:20px">
     <div class="sec-head">
       <div class="sec-title">오늘 과목별 공부 시간</div>
-      <div class="sec-note">누르면 그 과목으로 이어서 시작</div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="sec-note" id="subjNote">누르면 그 과목으로 이어서 시작</div>
+        <div style="position:relative">
+          <button class="dots" id="subjDots" title="더보기">⋯</button>
+          <div class="menu hide" id="subjMenu">
+            <button class="menu-i" id="subjDelMode">기록 삭제하기</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="subj-grid" id="subjGrid"></div>
     <div class="empty hide" id="subjEmpty">아직 과목이 없다. 위 칸에 과목 이름을 적고 공부 시작을 눌러라.</div>
@@ -517,6 +542,17 @@
     <button class="pardon" id="pardonStop">공부 끝내려고 왔어 · 종료</button>
   </div>
   <div style="font-size:12px; color:#6f6b64; text-align:center">이 두 개를 누르면 방금 센 딴짓 1회는 지워준다.</div>
+</div>
+
+<div id="confirm" class="hide">
+  <div class="cf-box">
+    <div class="cf-t" id="cfTitle"></div>
+    <div class="cf-s" id="cfSub"></div>
+    <div class="cf-row">
+      <button class="cf-y" id="cfYes">예</button>
+      <button class="cf-n" id="cfNo">아니요</button>
+    </div>
+  </div>
 </div>
 
 <div id="beg" class="hide">
@@ -1254,6 +1290,68 @@ function renderFriends() {
 
 setInterval(() => { if (isOnline() && frLoaded) loadFriends(); }, 90000);
 
+/* ---------------- 기록 삭제 ---------------- */
+let delMode = false;
+
+$("subjDots").onclick = e => {
+  e.stopPropagation();
+  if (delMode) { delMode = false; $("subjMenu").classList.add("hide"); render(); return; }
+  $("subjMenu").classList.toggle("hide");
+};
+document.addEventListener("click", () => $("subjMenu").classList.add("hide"));
+$("subjMenu").onclick = e => e.stopPropagation();
+
+$("subjDelMode").onclick = () => {
+  delMode = true;
+  $("subjMenu").classList.add("hide");
+  render();
+};
+
+let cfAction = null;
+function ask(title, sub, fn) {
+  $("cfTitle").textContent = title;
+  $("cfSub").textContent = sub;
+  cfAction = fn;
+  $("confirm").classList.remove("hide");
+}
+$("cfNo").onclick = () => { cfAction = null; $("confirm").classList.add("hide"); };
+$("cfYes").onclick = () => {
+  const f = cfAction;
+  cfAction = null;
+  $("confirm").classList.add("hide");
+  if (f) f();
+};
+
+function askDelete(n) {
+  ask("정말 이 공부를 안 한 걸로 할 거냐?",
+      '"' + n + '" 의 오늘 기록이 사라진다. 되돌릴 수 없다.',
+      () => deleteSubjectToday(n));
+}
+
+function deleteSubjectToday(n) {
+  const key = dayKey();
+  const d = dayOf(key);
+  const rec = d.subjects[n];
+  if (!rec) return;
+  const subjects = Object.assign({}, d.subjects);
+  delete subjects[n];
+  const left = Object.keys(subjects).reduce((t, k) => t + subjects[k].ms, 0);
+  const lost = rec.ms;
+  const ratio = d.ms > 0 ? Math.max(0, (d.ms - lost)) / d.ms : 0;
+  state.days[key] = {
+    ms: Math.max(left, d.ms - lost),
+    dist: Math.max(0, d.dist - rec.dist),
+    sessions: Math.max(0, d.sessions - 1),
+    best: d.best,
+    subjects,
+    hours: d.hours.map(v => Math.round(v * ratio))
+  };
+  if (state.subject === n) { state.subject = ""; $("subjInput").value = ""; }
+  saveDay(key);
+  saveLocal();
+  render();
+}
+
 /* ---------------- 수기 기록 ---------------- */
 let manColor = PALETTE[0][0];
 
@@ -1299,7 +1397,7 @@ $("manAdd").onclick = () => {
   subjects[name] = { ms: prev.ms + ms, dist: prev.dist };
   if (!colors[name]) { colors[name] = manColor; }
 
-  state.days[dk] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: Math.max(d.best, ms), subjects, hours };
+  state.days[dk] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: d.best, subjects, hours };
   saveDay(dk);
   saveLocal();
   $("manFrom").value = ""; $("manTo").value = ""; $("manSubj").value = "";
@@ -1479,17 +1577,35 @@ function render() {
   });
   if (live > 0) subjTotal[name] = (subjTotal[name] || 0) + live;
 
+  $("subjDots").classList.toggle("on", delMode);
+  $("subjNote").textContent = delMode ? "지울 과목을 눌러라 · ⋯ 다시 누르면 끝" : "누르면 그 과목으로 이어서 시작";
   $("subjHint").textContent = state.status === "running"
     ? "공부 중에는 과목을 바꿀 수 없다. 중지하거나 종료한 뒤 바꿔라."
     : (subjTotal[name] ? "지금까지 " + fmtShort(subjTotal[name]) + " 했다" : "새 과목이 된다");
+
+  const streakOf = n => {
+    let c = 0;
+    for (let i = 0; i < 400; i++) {
+      const dt = new Date(); dt.setDate(dt.getDate() - i);
+      const rec = state.days[dayKey(dt)];
+      const has = rec && rec.subjects && rec.subjects[n];
+      if (has) c++;
+      else if (i > 0) break;
+    }
+    return c;
+  };
 
   const names = Object.keys(subjTotal).sort((a, b) => subjTotal[b] - subjTotal[a]);
   $("subjEmpty").classList.toggle("hide", names.length > 0);
   $("subjGrid").innerHTML = names.map(n => {
     const on = n === name && state.status !== "idle";
-    const meta = on
-      ? (state.status === "running" ? "지금 공부 중" : "멈춰 있음 · 이어서 시작")
-      : (subjDays[n] || 0) + "일 공부함";
+    const st = streakOf(n), tot = subjDays[n] || 0;
+    let meta;
+    if (on) meta = state.status === "running" ? "지금 공부 중" : "멈춰 있음 · 이어서 시작";
+    else if (tot <= 1 && st <= 1) meta = "오늘 새 과목을 잡았군. 힘내라!";
+    else if (st >= 7) meta = st + "일 연속이라니. 도깨비도 존경한다.";
+    else if (st >= 2) meta = st + "일 연속 같은 과목이군! 잘하고 있다.";
+    else meta = "오랜만이군. 다시 붙어라.";
     const dn = subjDist[n] || 0;
     return '<div class="subj' + (on ? " on" : "") + '">' +
       '<button class="subj-go" data-n="' + esc(n) + '">' +
@@ -1500,11 +1616,17 @@ function render() {
         '<div class="subj-t" style="color:' + colorOf(n) + '">' + fmtShort(subjTotal[n]) + '</div>' +
         '<div class="subj-m">' + meta + '</div>' +
       '</button>' +
-      '<button class="beg-btn" data-beg="' + esc(n) + '"' + (dn > 0 ? '' : ' disabled') + '>깨비님께 빌기</button>' +
+      (delMode
+        ? '<button class="del-b" data-del="' + esc(n) + '">이 과목 기록 삭제</button>'
+        : '<button class="beg-btn" data-beg="' + esc(n) + '"' + (dn > 0 ? '' : ' disabled') + '>깨비님께 빌기</button>') +
     '</div>';
   }).join("");
+  Array.prototype.forEach.call($("subjGrid").querySelectorAll("[data-del]"), b => {
+    b.onclick = () => askDelete(b.getAttribute("data-del"));
+  });
   Array.prototype.forEach.call($("subjGrid").querySelectorAll(".subj-go"), b => {
-    b.onclick = () => resume(b.getAttribute("data-n"));
+    b.onclick = () => { if (!delMode) resume(b.getAttribute("data-n")); };
+    b.style.cursor = delMode ? "default" : "pointer";
   });
   Array.prototype.forEach.call($("subjGrid").querySelectorAll(".beg-btn"), b => {
     b.onclick = () => openBeg(b.getAttribute("data-beg"));
