@@ -993,12 +993,15 @@ function dayOf(key) {
 function curName() { return ($("subjInput").value || "").trim() || "공부"; }
 
 /* ---------------- 저장 / 불러오기 ---------------- */
+function storeKey() {
+  return (state.user && state.user.id && state.user.id !== "local") ? KEY + ":" + state.user.id : KEY;
+}
 function saveLocal() {
-  try { localStorage.setItem(KEY, JSON.stringify({ days: state.days, user: state.user, subject: state.subject, colors, goalHours: GOAL_HOURS, nickname, tone: TONE })); } catch (e) {}
+  try { localStorage.setItem(storeKey(), JSON.stringify({ days: state.days, user: state.user, subject: state.subject, colors, goalHours: GOAL_HOURS, nickname, tone: TONE })); } catch (e) {}
 }
 function loadLocal() {
   try {
-    const p = JSON.parse(localStorage.getItem(KEY) || "{}");
+    const p = JSON.parse(localStorage.getItem(storeKey()) || "{}");
     state.days = p.days || {};
     state.subject = p.subject || "";
     colors = p.colors || {};
@@ -1022,7 +1025,7 @@ async function saveDay(key) {
 
 async function loadRemote() {
   if (!sb || !state.user) return;
-  const { data } = await sb.from("study_days").select("*");
+  const { data } = await sb.from("study_days").select("*").eq("user_id", state.user.id);
   if (!data) return;
   data.forEach(r => {
     state.days[r.day] = {
@@ -1041,6 +1044,8 @@ async function initAuth() {
   if (data.session) {
     const u = data.session.user;
     state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
+    state.days = {};
+    loadLocal();
     await loadRemote();
     await ensureProfile();
     loadFriends();
@@ -1049,6 +1054,8 @@ async function initAuth() {
     if (session) {
       const u = session.user;
       state.user = { id: u.id, name: u.user_metadata.full_name || "공부하는 사람", email: u.email };
+      state.days = {};
+      loadLocal();
       loadRemote().then(() => ensureProfile()).then(() => loadFriends());
     } else {
       state.user = null;
@@ -1070,7 +1077,10 @@ $("signInBtn").onclick = async () => {
 $("signOutBtn").onclick = async () => {
   if (sb) await sb.auth.signOut();
   state.user = null; state.status = "idle"; state.elapsed = 0; base = 0; lastTick = null;
-  saveLocal();
+  state.days = {}; state.subject = ""; state.streak = 0;
+  colors = {}; nickname = ""; streakBase = 0; leftAt = null;
+  friends = []; pending = []; myProfile = null; frLoaded = false; delMode = false;
+  $("subjInput").value = "";
   render();
 };
 
