@@ -191,9 +191,20 @@
   .cal-nav:hover { color:#eeeae1; border-color:#4a453e; }
   .cal { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
   .cal-dow { text-align:center; font-size:11.5px; font-weight:600; padding-bottom:2px; }
-  .cal-cell { aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; padding:6px 7px; }
-  .cal-d { font-size:12.5px; font-weight:600; line-height:1; }
-  .cal-h { align-self:flex-end; font-size:9.5px; line-height:1; }
+  .cal-cell { position:relative; aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; padding:6px 7px; }
+  .cal-d { font-size:12.5px; font-weight:600; line-height:1; position:relative; z-index:2; }
+  .cal-h { align-self:flex-end; font-size:9.5px; line-height:1; position:relative; z-index:2; }
+  .cal-dk { position:absolute; left:50%; top:50%; transform:translate(-50%,-48%); width:38px; height:40px; z-index:1; pointer-events:none; }
+  .cal-dk .hn { position:absolute; top:0; width:8px; height:11px; background:#f3e4c8; }
+  .cal-dk .hn.l { left:4px; clip-path:polygon(0 0, 100% 100%, 38% 100%); transform:rotate(-12deg); }
+  .cal-dk .hn.r { right:4px; clip-path:polygon(100% 0, 0 100%, 62% 100%); transform:rotate(12deg); }
+  .cal-dk .hd { position:absolute; left:2px; top:8px; width:34px; height:32px; border-radius:50% 50% 44% 44%; }
+  .cal-dk .fc { position:absolute; left:5px; top:4px; right:5px; bottom:6px; background:#f3e4c8; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+  .cal-dk .ey { display:flex; gap:7px; }
+  .cal-dk .ey i { width:4px; height:4px; background:#2b1410; border-radius:50%; }
+  .cal-dk .ey i.slit { width:7px; height:2px; border-radius:2px; }
+  .cal-dk .mo { background:#2b1410; }
+  @media (max-width: 620px) { .cal-dk { width:26px; height:28px; } .cal-dk .hd { left:0; width:26px; height:24px; } .cal-dk .hn { display:none; } }
   .sw { width:15px; height:15px; border-radius:4px; }
 
   #alert { position:fixed; inset:0; background:rgba(12,10,9,.985); backdrop-filter:blur(8px); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:20px; padding:28px 24px; overflow-y:auto; animation:dk-in .18s ease-out; }
@@ -1728,6 +1739,28 @@ function levelColor(ms) {
   return "#ef4444";
 }
 
+const CAL_MOOD = [
+  { max: 0,   hood: "#3a352e", op: .5,  say: "도깨비가 낮잠 잤다",       eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:9px; height:2px; border-radius:2px' },
+  { max: 1,   hood: "#8a3b2a", op: .82, say: "겨우 앉았군",             eye: '<i></i><i></i>',                          mo: 'width:9px; height:3px; border-radius:2px; transform:rotate(0deg)' },
+  { max: 3,   hood: "#a8571f", op: .9,  say: "그럭저럭이군",             eye: '<i></i><i></i>',                          mo: 'width:10px; height:4px; border-radius:0 0 6px 6px' },
+  { max: 5,   hood: "#5fa855", op: .95, say: "오, 제법인데",             eye: '<i></i><i></i>',                          mo: 'width:13px; height:7px; border-radius:0 0 9px 9px' },
+  { max: 999, hood: "#2f9c8f", op: 1,   say: "도깨비도 감탄했다",         eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:16px; height:9px; border-radius:0 0 11px 11px' }
+];
+
+function calMood(ms) {
+  const hrs = ms / 3600000;
+  const m = CAL_MOOD.find(x => hrs <= x.max) || CAL_MOOD[CAL_MOOD.length - 1];
+  return {
+    say: m.say,
+    html: '<div class="cal-dk" style="opacity:' + m.op + '">' +
+      '<span class="hn l"></span><span class="hn r"></span>' +
+      '<span class="hd" style="background:' + m.hood + '">' +
+        '<span class="fc"><span class="ey">' + m.eye + '</span><span class="mo" style="' + m.mo + '"></span></span>' +
+      '</span>' +
+    '</div>'
+  };
+}
+
 function renderCalendar(live, key) {
   const now = new Date();
   const cal = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
@@ -1751,8 +1784,10 @@ function renderCalendar(live, key) {
     if (ms > 0) { sum += ms; cnt++; }
     const strong = ms / 3600000 >= 3;
     const ring = k === key ? "#f6f2e9" : ms > 0 ? "transparent" : "#2b2823";
-    html += '<div class="cal-cell" title="' + k + " · " + fmtShort(ms) + " · 딴짓 " + rec.dist + '회" style="background:' + levelColor(ms) + '; border:1px solid ' + ring + '">' +
+    const mood = calMood(ms);
+    html += '<div class="cal-cell" title="' + k + " · " + fmtShort(ms) + " · 딴짓 " + rec.dist + "회 · " + mood.say + '" style="background:' + levelColor(ms) + '; border:1px solid ' + ring + '">' +
       '<div class="cal-d" style="color:' + (ms > 0 ? (strong ? "#fffaf0" : "#e0d8ca") : "#5f5b54") + '">' + d + '</div>' +
+      mood.html +
       '<div class="cal-h" style="color:' + (strong ? "rgba(255,250,240,.8)" : "#9b8f80") + '">' + (ms >= 60000 ? (ms / 3600000).toFixed(1) : "") + '</div>' +
     '</div>';
   }
