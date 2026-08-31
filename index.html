@@ -76,7 +76,9 @@
   .subj:hover { border-color:#b91c1c; }
   .subj.on { border-color:#b91c1c; }
   .subj-n { font-size:14px; font-weight:600; color:#eeeae1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .tone-b { font-family:inherit; font-size:12px; font-weight:600; color:#a9a49b; background:#131311; border:1px solid #33302a; border-radius:999px; padding:7px 13px; }
+  .tone-b { display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12px; font-weight:600; color:#a9a49b; background:#131311; border:1px solid #33302a; border-radius:999px; padding:5px 13px 5px 6px; }
+  .tone-face { position:relative; width:24px; height:26px; border-radius:50% 50% 40% 40%; overflow:hidden; flex:none; }
+  .tone-inner { position:absolute; left:50%; top:52%; width:118px; height:114px; transform:translate(-50%,-50%) scale(.21); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:11px; background:#f3e4c8; border-radius:50%; }
   .tone-b:hover { color:#eeeae1; border-color:#6b5642; }
   .tone-b.on { color:#fffaf0; background:#b91c1c; border-color:#b91c1c; }
   .sw { width:26px; height:26px; border-radius:50%; border:2px solid transparent; padding:0; cursor:pointer; transition:transform .15s ease; }
@@ -241,17 +243,9 @@
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
     <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
-    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
-      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:11px">
-        <div style="display:flex; gap:19px">
-          <div class="eyeball"><div class="pupil"></div></div>
-          <div class="eyeball"><div class="pupil"></div></div>
-        </div>
-        <div style="width:22px; height:6px; background:#2b1410; border-radius:4px"></div>
-        <div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div>
-        <div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>
-      </div>
-      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px"></div>
+    <div class="hood" id="studyHood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" id="studyFace" style="left:21px; top:18px; right:21px; bottom:38px; gap:11px"></div>
+      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px" id="studyCollar"></div>
     </div>
   </div>
 
@@ -465,8 +459,8 @@
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
     <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
-    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
-      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:9px">
+    <div class="hood" id="alertHood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" id="alertFace" style="left:21px; top:18px; right:21px; bottom:38px; gap:9px">
         <div style="display:flex; gap:19px">
           <div class="eye" style="width:14px; height:14px"></div>
           <div class="eye" style="width:14px; height:14px"></div>
@@ -497,7 +491,7 @@
 </div>
 
 <div id="beg" class="hide">
-  <div class="bubble">울어봐, 빌어도 좋고</div>
+  <div class="bubble">너의 진심을 보여줘봐.</div>
   <div class="dk dk-study">
     <div class="club" style="left:192px; top:40px; width:26px; height:130px; border-radius:13px; transform:rotate(12deg)">
       <div class="knob" style="left:-7px; top:14px; width:17px; height:17px"></div>
@@ -564,10 +558,7 @@ const LINES = {
     ["니 눈이 딴 데 가 있드라", "앉아라. 강의 처음부터 다시 듣기 싫으믄."],
     ["아까부터 지켜봤다이", "공부는 니가 하고 딴짓은 누가 하노. 니가 하지."],
     ["뭐 그리 급하게 나갔다 오노", "숨 고르고 화면 봐라. 도깨비 성질 긁지 말고."],
-    ["이 자슥, 또 나갔드나", "니 합격표 내가 들고 있다. 자리에 앉아라."],
-    ["마", "좀 하라면 해라 깝깝하다 진짜로"],
-    ["블루베리스무디", "무 봤나? 니가 그것보다 별로데이"],
-    ["이거 어디까지 내려가는 거예요?", "니 성적 어디까지 내려가는 거예요?"]
+    ["이 자슥, 또 나갔드나", "니 합격표 내가 들고 있다. 자리에 앉아라."]
   ],
   "무섭고 짧은 호통": [
     ["돌아왔군.", "나는 네가 나간 순간부터 세고 있었다."],
@@ -582,9 +573,7 @@ const LINES = {
     ["복귀 확인", "누적 이탈 횟수가 갱신되었습니다."],
     ["주의", "이탈이 반복되면 오늘 목표 달성이 어렵습니다."],
     ["기록 완료", "이탈 시각과 복귀 시각이 저장되었습니다."],
-    ["경고 3단계", "집중 시간이 초기화되었습니다."],
-    ["아 깨비", "도깨비나라 말로 아쉽다는 뜻입니다 하하하."],
-    ["그냥 포기하는 거 어떻습니까", "인간의 집중력 한심합니다."]
+    ["경고 3단계", "집중 시간이 초기화되었습니다."]
   ]
 };
 
@@ -690,6 +679,57 @@ const PALETTE = [
   ["#b91c1c","빨강"], ["#e07a2f","주황"], ["#d9b23c","노랑"], ["#5fa855","초록"], ["#2f9c8f","청록"],
   ["#3d7fd0","파랑"], ["#7b64d6","보라"], ["#c25aa0","분홍"], ["#a97452","갈색"], ["#8f9298","회색"]
 ];
+
+/* 말투별 도깨비 생김새 */
+const FACE = {
+  "귀엽게 툴툴": {
+    hood: "#b91c1c", collar: "#8f1414",
+    watch: '<div style="display:flex; gap:19px"><div class="eyeball"><div class="pupil"></div></div><div class="eyeball"><div class="pupil"></div></div></div>' +
+           '<div style="width:22px; height:6px; background:#2b1410; border-radius:4px"></div>' +
+           '<div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div><div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>',
+    angry: '<div style="display:flex; gap:19px"><div style="width:16px; height:16px; background:#2b1410; border-radius:50%"></div><div style="width:16px; height:16px; background:#2b1410; border-radius:50%"></div></div>' +
+           '<div style="width:30px; height:22px; background:#2b1410; border-radius:6px 6px 16px 16px; display:flex; justify-content:center; gap:4px; padding-top:2px"><div style="width:7px; height:8px; background:#fffaf0; border-radius:0 0 3px 3px"></div><div style="width:7px; height:8px; background:#fffaf0; border-radius:0 0 3px 3px"></div></div>' +
+           '<div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div><div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>'
+  },
+  "구수한 사투리": {
+    hood: "#a8571f", collar: "#7d3d12",
+    watch: '<div style="display:flex; gap:15px; margin-bottom:-4px"><div style="width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(-8deg)"></div><div style="width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(8deg)"></div></div>' +
+           '<div style="display:flex; gap:19px"><div class="eyeball"><div class="pupil"></div></div><div class="eyeball"><div class="pupil"></div></div></div>' +
+           '<div style="width:26px; height:9px; background:#2b1410; border-radius:0 0 14px 14px"></div>' +
+           '<div class="cheek" style="left:2px; top:50px; width:23px; height:14px; opacity:1"></div><div class="cheek" style="right:2px; top:50px; width:23px; height:14px; opacity:1"></div>',
+    angry: '<div style="display:flex; gap:13px; margin-bottom:-3px"><div style="width:28px; height:8px; background:#4a2a12; border-radius:4px; transform:rotate(19deg)"></div><div style="width:28px; height:8px; background:#4a2a12; border-radius:4px; transform:rotate(-19deg)"></div></div>' +
+           '<div style="display:flex; gap:19px"><div style="width:17px; height:17px; background:#2b1410; border-radius:50%"></div><div style="width:17px; height:17px; background:#2b1410; border-radius:50%"></div></div>' +
+           '<div style="width:34px; height:24px; background:#2b1410; border-radius:6px 6px 18px 18px; display:flex; justify-content:center; gap:5px; padding-top:2px"><div style="width:8px; height:9px; background:#fffaf0; border-radius:0 0 3px 3px"></div><div style="width:8px; height:9px; background:#fffaf0; border-radius:0 0 3px 3px"></div></div>' +
+           '<div class="cheek" style="left:2px; top:52px; width:23px; height:14px; opacity:1"></div><div class="cheek" style="right:2px; top:52px; width:23px; height:14px; opacity:1"></div>'
+  },
+  "무섭고 짧은 호통": {
+    hood: "#6d0f0f", collar: "#4a0a0a",
+    watch: '<div style="display:flex; gap:17px"><div style="width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(11deg)"></div><div style="width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(-11deg)"></div></div>' +
+           '<div style="width:30px; height:4px; background:#2b1410; border-radius:3px; margin-top:6px"></div>',
+    angry: '<div style="display:flex; gap:15px"><div style="width:32px; height:11px; background:#2b1410; border-radius:6px; transform:rotate(20deg)"></div><div style="width:32px; height:11px; background:#2b1410; border-radius:6px; transform:rotate(-20deg)"></div></div>' +
+           '<div style="width:40px; height:16px; background:#2b1410; border-radius:4px; margin-top:8px"></div>'
+  },
+  "차갑고 사무적인 경고": {
+    hood: "#46505c", collar: "#2f3740",
+    watch: '<div style="display:flex; gap:21px"><div style="width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:6px; height:6px; background:#2b3038; border-radius:1px"></div></div><div style="width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:6px; height:6px; background:#2b3038; border-radius:1px"></div></div></div>' +
+           '<div style="width:34px; height:3px; background:#2b3038; border-radius:2px; margin-top:8px"></div>',
+    angry: '<div style="display:flex; gap:21px"><div style="width:16px; height:16px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:8px; height:8px; background:#2b3038; border-radius:1px"></div></div><div style="width:16px; height:16px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:8px; height:8px; background:#2b3038; border-radius:1px"></div></div></div>' +
+           '<div style="width:40px; height:5px; background:#2b3038; border-radius:2px; margin-top:9px"></div>'
+  }
+};
+
+const painted = {};
+function paintFace(faceId, hoodId, collarId, mode) {
+  const sig = TONE + "|" + mode;
+  if (painted[faceId] === sig) return;
+  painted[faceId] = sig;
+  const f = FACE[TONE] || FACE["귀엽게 툴툴"];
+  const face = $(faceId), hood = $(hoodId);
+  if (!face || !hood) return;
+  face.innerHTML = f[mode];
+  hood.style.background = f.hood;
+  if (collarId && $(collarId)) $(collarId).style.background = f.collar;
+}
 
 const KEY = "dokkaebi-study-v2";
 const DAY_NAMES = ["일","월","화","수","목","금","토"];
@@ -1237,6 +1277,7 @@ function bump() {
   dk.style.animation = "none";
   void dk.offsetWidth;
   dk.style.animation = "dk-wiggle .55s ease-in-out 2";
+  paintFace("alertFace", "alertHood", null, "angry");
   $("alert").classList.remove("hide");
   if (SOUND) beep();
   render();
@@ -1275,6 +1316,7 @@ function render() {
   if (!signedIn) return;
 
   if (studying) {
+    paintFace("studyFace", "studyHood", "studyCollar", "watch");
     $("motiLine").textContent = MOTI[motiIdx % MOTI.length];
     $("watchLine").textContent = WATCH[watchIdx % WATCH.length];
     $("studySubject").textContent = curName();
@@ -1295,12 +1337,18 @@ function render() {
   $("nickGhost").textContent = nickname || "닉네임";
   $("myCode").textContent = (myProfile && myProfile.code) ? "#" + myProfile.code : "";
 
-  $("tonePick").innerHTML = Object.keys(LINES).map(t =>
-    '<button class="tone-b' + (t === TONE ? " on" : "") + '" data-t="' + esc(t) + '">' + esc(t) + '</button>'
-  ).join("");
+  if ($("tonePick").getAttribute("data-tone") !== TONE) {
+  $("tonePick").setAttribute("data-tone", TONE);
+  $("tonePick").innerHTML = Object.keys(LINES).map(t => {
+    const f = FACE[t] || FACE["귀엽게 툴툴"];
+    return '<button class="tone-b' + (t === TONE ? " on" : "") + '" data-t="' + esc(t) + '">' +
+      '<span class="tone-face" style="background:' + f.hood + '"><span class="tone-inner">' + f.watch + '</span></span>' +
+      esc(t) + '</button>';
+  }).join("");
   Array.prototype.forEach.call($("tonePick").querySelectorAll(".tone-b"), b => {
     b.onclick = () => { TONE = b.getAttribute("data-t"); saveLocal(); render(); };
   });
+  }
   $("goalVal").textContent = GOAL_HOURS;
   $("sessionLabel").textContent = fmt(state.elapsed);
   $("statusText").textContent = state.status === "running" ? name + " 감시 중" : state.status === "paused" ? "잠시 멈춤" : "대기 중";
