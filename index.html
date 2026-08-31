@@ -119,7 +119,7 @@
   @keyframes bk-pop { 0%{opacity:0; transform:scale(.2) translateY(30px)} 55%{opacity:1; transform:scale(1.12) translateY(-8px)} 100%{opacity:1; transform:scale(1) translateY(0)} }
   @keyframes bk-fall { 0%{opacity:1; transform:translateY(-40px) rotate(0)} 100%{opacity:0; transform:translateY(320px) rotate(540deg)} }
   @keyframes bk-flash { 0%{opacity:0} 12%{opacity:.95} 100%{opacity:0} }
-  #boom { position:fixed; inset:0; background:radial-gradient(120% 90% at 50% 40%, #241c17 0%, #0e0c0a 70%); z-index:10002; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:22px; padding:34px 24px; overflow:hidden; }
+  #boom { position:fixed; inset:0; background:radial-gradient(120% 90% at 50% 40%, #241c17 0%, #0e0c0a 70%); z-index:10002; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:22px; padding:34px 24px; overflow-y:auto; overflow-x:hidden; }
   #boomFlash { position:absolute; inset:0; background:radial-gradient(50% 40% at 50% 42%, #fff6dc 0%, rgba(255,200,120,.5) 45%, transparent 72%); opacity:0; pointer-events:none; }
   .bk-stage { position:relative; width:340px; height:510px; flex:none; display:flex; align-items:center; justify-content:center; }
   .bk-rope { position:absolute; left:50%; top:-34px; width:3px; height:44px; background:#6b5642; transform:translateX(-50%); }
@@ -137,7 +137,20 @@
   .bk-chip span:last-child { font-family:'Gowun Batang', serif; font-size:22px; font-weight:700; color:#f3e4c8; font-variant-numeric:tabular-nums; }
   .bk-ok { font-family:inherit; font-size:16px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:999px; padding:15px 34px; }
   .bk-ok:hover { background:#fff; }
-  @media (max-height: 680px) { .bk-stage { transform:scale(.72); margin:-30px 0; } .bk-word { font-size:32px; } }
+  @media (max-height: 860px) {
+    #boom { gap:14px; padding:20px 24px; }
+    .bk-stage { transform:scale(.66); margin:-88px 0; }
+    .bk-word { font-size:34px; }
+    .bk-sub { font-size:15px; }
+    .bk-chip { padding:8px 14px; }
+    .bk-chip span:last-child { font-size:19px; }
+    .bk-ok { padding:13px 28px; }
+  }
+  @media (max-height: 640px) {
+    .bk-stage { transform:scale(.52); margin:-124px 0; }
+    .bk-word { font-size:27px; }
+    .bk-sub { font-size:13.5px; }
+  }
   #confirm { position:fixed; inset:0; background:rgba(12,10,9,.92); backdrop-filter:blur(6px); z-index:10001; display:flex; align-items:center; justify-content:center; padding:28px; }
   .cf-box { max-width:420px; background:#1a1917; border:1px solid #3a352e; border-radius:18px; padding:30px 30px 26px; display:flex; flex-direction:column; gap:16px; align-items:center; text-align:center; }
   .cf-t { font-family:'Gowun Batang', serif; font-size:23px; font-weight:700; color:#f3e4c8; line-height:1.45; }
