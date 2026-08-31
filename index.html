@@ -102,6 +102,16 @@
   .beg-ok:disabled { color:#6f6b64; background:#26241f; cursor:default; }
   .smile { width:36px; height:18px; background:#2b1410; border-radius:0 0 20px 20px; }
   @media (max-height: 640px) { #beg .dk-study { transform:scale(.6); margin:-40px 0; } .beg-line { font-size:19px; } }
+  .man-grid { display:flex; gap:10px; flex-wrap:wrap; }
+  .man-f { display:flex; flex-direction:column; gap:6px; flex:1; min-width:118px; }
+  .man-f span { font-size:11.5px; color:#807b73; font-weight:600; }
+  .man-in { width:100%; font-family:inherit; font-size:14px; color:#eeeae1; background:#131311; border:1px solid #33302a; border-radius:10px; padding:10px 12px; outline:none; box-sizing:border-box; }
+  .man-in:focus { border-color:#b91c1c; }
+  .man-in::-webkit-calendar-picker-indicator { filter:invert(.7); cursor:pointer; }
+  .man-btn { font-family:inherit; font-size:13.5px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:10px; padding:11px 20px; }
+  .man-btn:hover { background:#fff; }
+  .man-msg { font-size:12.5px; color:#8fd6c4; }
+  .man-msg.bad { color:#f0776c; }
   .hbars { display:flex; align-items:flex-end; gap:3px; height:104px; }
   .hcol { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
   .hbar { width:100%; min-height:2px; border-radius:3px 3px 0 0; transition:height .4s ease; }
@@ -239,7 +249,7 @@
       <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
       <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
     </div>
-    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="sleeve" id="studySleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
     <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
@@ -366,6 +376,25 @@
     <div class="hbars" id="hourBars"></div>
   </div>
 
+  <!-- 수기 기록 -->
+  <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:18px">
+    <div class="sec-head">
+      <div class="sec-title">수기로 기록 추가</div>
+      <div class="sec-note">인터넷 없이 공부한 시간을 직접 적는다</div>
+    </div>
+    <div class="man-grid">
+      <label class="man-f"><span>날짜</span><input class="man-in" id="manDate" type="date" /></label>
+      <label class="man-f"><span>시작</span><input class="man-in" id="manFrom" type="time" /></label>
+      <label class="man-f"><span>종료</span><input class="man-in" id="manTo" type="time" /></label>
+      <label class="man-f" style="flex:1.6"><span>과목</span><input class="man-in" id="manSubj" placeholder="예: 고급회계 인강" autocomplete="off" /></label>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+      <div style="display:flex; gap:6px" id="manSw"></div>
+      <button class="man-btn" id="manAdd">기록 추가</button>
+      <div class="man-msg" id="manMsg"></div>
+    </div>
+  </div>
+
   <!-- 최근 7일 -->
   <!-- 친구 -->
   <div class="wrap card" style="padding:28px 30px; display:flex; flex-direction:column; gap:20px">
@@ -455,7 +484,7 @@
       <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
       <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
     </div>
-    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="sleeve" id="alertSleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
     <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
@@ -498,12 +527,12 @@
       <div class="knob" style="right:-7px; top:40px; width:16px; height:16px"></div>
       <div class="knob" style="left:-6px; top:98px; width:14px; height:14px"></div>
     </div>
-    <div class="sleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
+    <div class="sleeve" id="begSleeve" style="left:158px; top:104px; width:48px; height:22px; border-radius:11px; transform:rotate(-12deg)"></div>
     <div class="mitt" style="left:190px; top:90px; width:30px; height:30px"></div>
     <div class="horn" style="left:50px; top:0; width:32px; height:32px; border-radius:18px 5px 18px 18px; transform:rotate(-20deg)"></div>
     <div class="horn" style="left:116px; top:0; width:32px; height:32px; border-radius:5px 18px 18px 18px; transform:rotate(20deg)"></div>
-    <div class="hood" style="left:20px; top:20px; width:160px; height:170px">
-      <div class="face" style="left:21px; top:18px; right:21px; bottom:38px; gap:10px">
+    <div class="hood" id="begHood" style="left:20px; top:20px; width:160px; height:170px">
+      <div class="face" id="begFace" style="left:21px; top:18px; right:21px; bottom:38px; gap:10px">
         <div style="display:flex; gap:19px">
           <div style="width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(9deg)"></div>
           <div style="width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(-9deg)"></div>
@@ -512,7 +541,7 @@
         <div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div>
         <div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>
       </div>
-      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px"></div>
+      <div style="position:absolute; left:38px; right:38px; bottom:14px; height:13px; background:#8f1414; border-radius:8px" id="begCollar"></div>
     </div>
   </div>
 
@@ -684,6 +713,7 @@ const PALETTE = [
 const FACE = {
   "귀엽게 툴툴": {
     hood: "#b91c1c", collar: "#8f1414",
+    beg: "<div style=\"display:flex; gap:19px\"><div style=\"width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(9deg)\"></div><div style=\"width:26px; height:5px; background:#2b1410; border-radius:3px; transform:rotate(-9deg)\"></div></div><div style=\"width:36px; height:18px; background:#2b1410; border-radius:0 0 20px 20px\"></div><div class=\"cheek\" style=\"left:5px; top:52px; width:18px; height:11px\"></div><div class=\"cheek\" style=\"right:5px; top:52px; width:18px; height:11px\"></div>",
     watch: '<div style="display:flex; gap:19px"><div class="eyeball"><div class="pupil"></div></div><div class="eyeball"><div class="pupil"></div></div></div>' +
            '<div style="width:22px; height:6px; background:#2b1410; border-radius:4px"></div>' +
            '<div class="cheek" style="left:5px; top:52px; width:18px; height:11px"></div><div class="cheek" style="right:5px; top:52px; width:18px; height:11px"></div>',
@@ -693,6 +723,7 @@ const FACE = {
   },
   "구수한 사투리": {
     hood: "#a8571f", collar: "#7d3d12",
+    beg: "<div style=\"display:flex; gap:15px; margin-bottom:-4px\"><div style=\"width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(10deg)\"></div><div style=\"width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(-10deg)\"></div></div><div style=\"display:flex; gap:19px\"><div style=\"width:24px; height:5px; background:#2b1410; border-radius:3px\"></div><div style=\"width:24px; height:5px; background:#2b1410; border-radius:3px\"></div></div><div style=\"width:40px; height:20px; background:#2b1410; border-radius:0 0 22px 22px\"></div><div class=\"cheek\" style=\"left:2px; top:52px; width:23px; height:14px; opacity:1\"></div><div class=\"cheek\" style=\"right:2px; top:52px; width:23px; height:14px; opacity:1\"></div>",
     watch: '<div style="display:flex; gap:15px; margin-bottom:-4px"><div style="width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(-8deg)"></div><div style="width:26px; height:7px; background:#4a2a12; border-radius:4px; transform:rotate(8deg)"></div></div>' +
            '<div style="display:flex; gap:19px"><div class="eyeball"><div class="pupil"></div></div><div class="eyeball"><div class="pupil"></div></div></div>' +
            '<div style="width:26px; height:9px; background:#2b1410; border-radius:0 0 14px 14px"></div>' +
@@ -704,6 +735,7 @@ const FACE = {
   },
   "무섭고 짧은 호통": {
     hood: "#6d0f0f", collar: "#4a0a0a",
+    beg: "<div style=\"display:flex; gap:17px\"><div style=\"width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(9deg)\"></div><div style=\"width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(-9deg)\"></div></div><div style=\"width:34px; height:14px; background:#2b1410; border-radius:0 0 18px 18px; margin-top:6px\"></div>",
     watch: '<div style="display:flex; gap:17px"><div style="width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(11deg)"></div><div style="width:30px; height:9px; background:#2b1410; border-radius:5px; transform:rotate(-11deg)"></div></div>' +
            '<div style="width:30px; height:4px; background:#2b1410; border-radius:3px; margin-top:6px"></div>',
     angry: '<div style="display:flex; gap:15px"><div style="width:32px; height:11px; background:#2b1410; border-radius:6px; transform:rotate(20deg)"></div><div style="width:32px; height:11px; background:#2b1410; border-radius:6px; transform:rotate(-20deg)"></div></div>' +
@@ -711,6 +743,7 @@ const FACE = {
   },
   "차갑고 사무적인 경고": {
     hood: "#46505c", collar: "#2f3740",
+    beg: "<div style=\"display:flex; gap:21px\"><div style=\"width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center\"><div style=\"width:6px; height:6px; background:#2b3038; border-radius:1px\"></div></div><div style=\"width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center\"><div style=\"width:6px; height:6px; background:#2b3038; border-radius:1px\"></div></div></div><div style=\"width:28px; height:10px; background:#2b3038; border-radius:0 0 14px 14px; margin-top:8px\"></div>",
     watch: '<div style="display:flex; gap:21px"><div style="width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:6px; height:6px; background:#2b3038; border-radius:1px"></div></div><div style="width:14px; height:14px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:6px; height:6px; background:#2b3038; border-radius:1px"></div></div></div>' +
            '<div style="width:34px; height:3px; background:#2b3038; border-radius:2px; margin-top:8px"></div>',
     angry: '<div style="display:flex; gap:21px"><div style="width:16px; height:16px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:8px; height:8px; background:#2b3038; border-radius:1px"></div></div><div style="width:16px; height:16px; background:#e8eaed; border:1px solid #b7bec7; border-radius:3px; display:flex; align-items:center; justify-content:center"><div style="width:8px; height:8px; background:#2b3038; border-radius:1px"></div></div></div>' +
@@ -729,6 +762,8 @@ function paintFace(faceId, hoodId, collarId, mode) {
   face.innerHTML = f[mode];
   hood.style.background = f.hood;
   if (collarId && $(collarId)) $(collarId).style.background = f.collar;
+  const sl = $(faceId.replace("Face", "Sleeve"));
+  if (sl) sl.style.background = f.hood;
 }
 
 const KEY = "dokkaebi-study-v2";
@@ -948,6 +983,7 @@ function openBeg(n) {
   $("begInput").value = "";
   $("begMsg").textContent = "";
   $("begOk").disabled = true;
+  paintFace("begFace", "begHood", "begCollar", "beg");
   $("beg").classList.remove("hide");
   setTimeout(() => $("begInput").focus(), 80);
 }
@@ -1217,6 +1253,59 @@ function renderFriends() {
 }
 
 setInterval(() => { if (isOnline() && frLoaded) loadFriends(); }, 90000);
+
+/* ---------------- 수기 기록 ---------------- */
+let manColor = PALETTE[0][0];
+
+function paintManSw() {
+  $("manSw").innerHTML = PALETTE.map(p =>
+    '<button class="sw' + (p[0] === manColor ? " on" : "") + '" data-c="' + p[0] + '" title="' + p[1] + '" style="background:' + p[0] + '"></button>'
+  ).join("");
+  Array.prototype.forEach.call($("manSw").querySelectorAll(".sw"), b => {
+    b.onclick = () => { manColor = b.getAttribute("data-c"); paintManSw(); };
+  });
+}
+paintManSw();
+$("manDate").value = dayKey();
+
+$("manAdd").onclick = () => {
+  const msg = (t, bad) => { $("manMsg").textContent = t; $("manMsg").className = "man-msg" + (bad ? " bad" : ""); };
+  const dk = $("manDate").value;
+  const from = $("manFrom").value, to = $("manTo").value;
+  const name = ($("manSubj").value || "").trim() || "공부";
+  if (!dk) return msg("날짜를 골라라.", true);
+  if (!from || !to) return msg("시작과 종료 시각을 적어라.", true);
+  const [fh, fm] = from.split(":").map(Number);
+  const [th, tm] = to.split(":").map(Number);
+  let mins = (th * 60 + tm) - (fh * 60 + fm);
+  if (mins <= 0) mins += 24 * 60;
+  if (mins > 20 * 60) return msg("20시간이 넘는다. 다시 확인해라.", true);
+  const ms = mins * 60000;
+
+  const d = dayOf(dk);
+  const hours = d.hours.slice();
+  let cur = fh * 60 + fm, left = mins;
+  while (left > 0) {
+    const hIdx = Math.floor(cur / 60) % 24;
+    const room = 60 - (cur % 60);
+    const use = Math.min(room, left);
+    hours[hIdx] += use * 60000;
+    cur += use;
+    left -= use;
+  }
+
+  const subjects = Object.assign({}, d.subjects);
+  const prev = subjects[name] || { ms: 0, dist: 0 };
+  subjects[name] = { ms: prev.ms + ms, dist: prev.dist };
+  if (!colors[name]) { colors[name] = manColor; }
+
+  state.days[dk] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: Math.max(d.best, ms), subjects, hours };
+  saveDay(dk);
+  saveLocal();
+  $("manFrom").value = ""; $("manTo").value = ""; $("manSubj").value = "";
+  msg(name + " " + Math.floor(mins / 60) + "시간 " + (mins % 60) + "분을 더했다.");
+  render();
+};
 
 $("subjInput").oninput = () => { state.subject = $("subjInput").value; render(); };
 
