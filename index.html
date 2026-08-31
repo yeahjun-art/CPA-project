@@ -125,6 +125,25 @@
   .man-in { width:100%; font-family:inherit; font-size:14px; color:#eeeae1; background:#131311; border:1px solid #33302a; border-radius:10px; padding:10px 12px; outline:none; box-sizing:border-box; }
   .man-in:focus { border-color:#b91c1c; }
   .man-in::-webkit-calendar-picker-indicator { filter:invert(.7); cursor:pointer; }
+  .tp-wrap { position:relative; }
+  .tp-btn { display:flex; align-items:center; justify-content:space-between; gap:8px; text-align:left; cursor:pointer; }
+  .tp-btn.set { color:#eeeae1; }
+  .tp-btn.empty { color:#5f5b54; }
+  .tp-ic { font-size:13px; opacity:.6; }
+  .tp-pop { position:absolute; left:0; top:calc(100% + 8px); z-index:60; width:268px; background:#221f1b; border:1px solid #3a352e; border-radius:20px; padding:16px; box-shadow:0 18px 40px rgba(0,0,0,.5); display:flex; flex-direction:column; gap:13px; }
+  .tp-seg { display:flex; background:#161513; border-radius:999px; padding:3px; gap:3px; }
+  .tp-seg button { flex:1; font-family:inherit; font-size:13px; font-weight:600; color:#a9a49b; background:transparent; border:none; border-radius:999px; padding:8px 0; }
+  .tp-seg button.on { color:#fffaf0; background:#b91c1c; }
+  .tp-lab { font-size:11px; letter-spacing:1.5px; color:#807b73; font-weight:600; }
+  .tp-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:5px; }
+  .tp-grid.m { grid-template-columns:repeat(4, 1fr); }
+  .tp-grid button { font-family:inherit; font-size:12.5px; font-weight:600; color:#c9c2b4; background:#161513; border:1px solid transparent; border-radius:999px; padding:8px 0; font-variant-numeric:tabular-nums; }
+  .tp-grid button:hover { color:#fffaf0; border-color:#6b5642; }
+  .tp-grid button.on { color:#fffaf0; background:#b91c1c; border-color:#b91c1c; }
+  .tp-foot { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:2px; }
+  .tp-now { font-family:'Gowun Batang', serif; font-size:17px; font-weight:700; color:#f3e4c8; font-variant-numeric:tabular-nums; }
+  .tp-ok { font-family:inherit; font-size:13px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:999px; padding:9px 20px; }
+  .tp-ok:hover { background:#fff; }
   .man-btn { font-family:inherit; font-size:13.5px; font-weight:600; color:#1f1d1a; background:#f6f2e9; border:none; border-radius:10px; padding:11px 20px; }
   .man-btn:hover { background:#fff; }
   .man-msg { font-size:12.5px; color:#8fd6c4; }
@@ -420,8 +439,18 @@
     </div>
     <div class="man-grid">
       <label class="man-f"><span>날짜</span><input class="man-in" id="manDate" type="date" /></label>
-      <label class="man-f"><span>시작</span><input class="man-in" id="manFrom" type="time" /></label>
-      <label class="man-f"><span>종료</span><input class="man-in" id="manTo" type="time" /></label>
+      <div class="man-f"><span>시작</span>
+        <div class="tp-wrap">
+          <button class="man-in tp-btn" id="manFromBtn" data-for="manFrom"><span id="manFromLbl">시각 선택</span><span class="tp-ic">🕘</span></button>
+          <div class="tp-pop hide" id="manFromPop"></div>
+        </div>
+      </div>
+      <div class="man-f"><span>종료</span>
+        <div class="tp-wrap">
+          <button class="man-in tp-btn" id="manToBtn" data-for="manTo"><span id="manToLbl">시각 선택</span><span class="tp-ic">🕘</span></button>
+          <div class="tp-pop hide" id="manToPop"></div>
+        </div>
+      </div>
       <label class="man-f" style="flex:1.6"><span>과목</span><input class="man-in" id="manSubj" placeholder="예: 고급회계 인강" autocomplete="off" /></label>
     </div>
     <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
@@ -492,6 +521,10 @@
       </div>
     </div>
     <div class="cal" id="calGrid"></div>
+    <div id="calSay" style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:2px 2px 0">
+      <span style="font-family:'Gowun Batang', serif; font-size:18px; font-weight:700; color:#f3e4c8" id="calSayLine"></span>
+      <span style="font-size:12px; color:#807b73" id="calSayDate"></span>
+    </div>
     <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-top:4px">
       <div style="display:flex; align-items:center; gap:8px; font-size:11.5px; color:#807b73">
         <span>적게</span>
@@ -1363,6 +1396,75 @@ function deleteSubjectToday(n) {
   render();
 }
 
+/* ---------------- 시각 고르기 ---------------- */
+const tpState = { manFrom: null, manTo: null };
+
+function tpDraw(id) {
+  const pop = $(id + "Pop");
+  const s = tpState[id] || { ap: new Date().getHours() < 12 ? 0 : 1, h: 9, m: 0 };
+  const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  const mins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+  pop.innerHTML =
+    '<div class="tp-seg">' +
+      '<button data-ap="0" class="' + (s.ap === 0 ? "on" : "") + '">오전</button>' +
+      '<button data-ap="1" class="' + (s.ap === 1 ? "on" : "") + '">오후</button>' +
+    '</div>' +
+    '<div class="tp-lab">시</div>' +
+    '<div class="tp-grid">' + hours.map(v =>
+      '<button data-h="' + v + '" class="' + (s.h === v ? "on" : "") + '">' + v + '</button>').join("") + '</div>' +
+    '<div class="tp-lab">분</div>' +
+    '<div class="tp-grid m">' + mins.map(v =>
+      '<button data-m="' + v + '" class="' + (s.m === v ? "on" : "") + '">' + String(v).padStart(2, "0") + '</button>').join("") + '</div>' +
+    '<div class="tp-foot">' +
+      '<div class="tp-now">' + (s.ap ? "오후" : "오전") + " " + s.h + ":" + String(s.m).padStart(2, "0") + '</div>' +
+      '<button class="tp-ok">확인</button>' +
+    '</div>';
+
+  const pick = patch => { tpState[id] = Object.assign({}, s, patch); tpDraw(id); };
+  Array.prototype.forEach.call(pop.querySelectorAll("[data-ap]"), b => b.onclick = () => pick({ ap: +b.getAttribute("data-ap") }));
+  Array.prototype.forEach.call(pop.querySelectorAll("[data-h]"), b => b.onclick = () => pick({ h: +b.getAttribute("data-h") }));
+  Array.prototype.forEach.call(pop.querySelectorAll("[data-m]"), b => b.onclick = () => pick({ m: +b.getAttribute("data-m") }));
+  pop.querySelector(".tp-ok").onclick = () => {
+    tpState[id] = s;
+    tpLabel(id);
+    pop.classList.add("hide");
+  };
+  pop.onclick = e => e.stopPropagation();
+}
+
+function tpLabel(id) {
+  const s = tpState[id];
+  const btn = $(id + "Btn"), lbl = $(id + "Lbl");
+  if (!s) { lbl.textContent = "시각 선택"; btn.className = "man-in tp-btn empty"; return; }
+  lbl.textContent = (s.ap ? "오후" : "오전") + " " + s.h + ":" + String(s.m).padStart(2, "0");
+  btn.className = "man-in tp-btn set";
+}
+
+function tpValue(id) {
+  const s = tpState[id];
+  if (!s) return null;
+  let hh = s.h % 12;
+  if (s.ap) hh += 12;
+  return { h: hh, m: s.m };
+}
+
+["manFrom", "manTo"].forEach(id => {
+  tpLabel(id);
+  $(id + "Btn").onclick = e => {
+    e.stopPropagation();
+    const other = id === "manFrom" ? "manTo" : "manFrom";
+    $(other + "Pop").classList.add("hide");
+    const pop = $(id + "Pop");
+    const willOpen = pop.classList.contains("hide");
+    pop.classList.toggle("hide");
+    if (willOpen) tpDraw(id);
+  };
+});
+document.addEventListener("click", () => {
+  $("manFromPop").classList.add("hide");
+  $("manToPop").classList.add("hide");
+});
+
 /* ---------------- 수기 기록 ---------------- */
 let manColor = PALETTE[0][0];
 
@@ -1380,12 +1482,11 @@ $("manDate").value = dayKey();
 $("manAdd").onclick = () => {
   const msg = (t, bad) => { $("manMsg").textContent = t; $("manMsg").className = "man-msg" + (bad ? " bad" : ""); };
   const dk = $("manDate").value;
-  const from = $("manFrom").value, to = $("manTo").value;
+  const from = tpValue("manFrom"), to = tpValue("manTo");
   const name = ($("manSubj").value || "").trim() || "공부";
   if (!dk) return msg("날짜를 골라라.", true);
-  if (!from || !to) return msg("시작과 종료 시각을 적어라.", true);
-  const [fh, fm] = from.split(":").map(Number);
-  const [th, tm] = to.split(":").map(Number);
+  if (!from || !to) return msg("시작과 종료 시각을 골라라.", true);
+  const fh = from.h, fm = from.m, th = to.h, tm = to.m;
   let mins = (th * 60 + tm) - (fh * 60 + fm);
   if (mins <= 0) mins += 24 * 60;
   if (mins > 20 * 60) return msg("20시간이 넘는다. 다시 확인해라.", true);
@@ -1411,7 +1512,9 @@ $("manAdd").onclick = () => {
   state.days[dk] = { ms: d.ms + ms, dist: d.dist, sessions: d.sessions + 1, best: d.best, subjects, hours };
   saveDay(dk);
   saveLocal();
-  $("manFrom").value = ""; $("manTo").value = ""; $("manSubj").value = "";
+  tpState.manFrom = null; tpState.manTo = null;
+  tpLabel("manFrom"); tpLabel("manTo");
+  $("manSubj").value = "";
   msg(name + " " + Math.floor(mins / 60) + "시간 " + (mins % 60) + "분을 더했다.");
   render();
 };
@@ -1740,11 +1843,11 @@ function levelColor(ms) {
 }
 
 const CAL_MOOD = [
-  { max: 0,   hood: "#3a352e", op: .5,  say: "도깨비가 낮잠 잤다",       eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:9px; height:2px; border-radius:2px' },
-  { max: 1,   hood: "#8a3b2a", op: .82, say: "겨우 앉았군",             eye: '<i></i><i></i>',                          mo: 'width:9px; height:3px; border-radius:2px; transform:rotate(0deg)' },
-  { max: 3,   hood: "#a8571f", op: .9,  say: "그럭저럭이군",             eye: '<i></i><i></i>',                          mo: 'width:10px; height:4px; border-radius:0 0 6px 6px' },
-  { max: 5,   hood: "#5fa855", op: .95, say: "오, 제법인데",             eye: '<i></i><i></i>',                          mo: 'width:13px; height:7px; border-radius:0 0 9px 9px' },
-  { max: 999, hood: "#2f9c8f", op: 1,   say: "도깨비도 감탄했다",         eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:16px; height:9px; border-radius:0 0 11px 11px' }
+  { max: 0,   hood: "#3a352e", face: "#6b655c", op: .55, say: "도깨비가 낮잠 잤다",  eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:9px; height:2px; border-radius:2px' },
+  { max: 1,   hood: "#7d1010", face: "#e7d7b6", op: .9,  say: "겨우 앉았군",        eye: '<i></i><i></i>',                          mo: 'width:9px; height:3px; border-radius:2px' },
+  { max: 3,   hood: "#8f1414", face: "#f0e2c2", op: .95, say: "그럭저럭이군",        eye: '<i></i><i></i>',                          mo: 'width:10px; height:4px; border-radius:0 0 6px 6px' },
+  { max: 5,   hood: "#f3e4c8", face: "#fffaf0", op: 1,   say: "오, 제법인데",        eye: '<i></i><i></i>',                          mo: 'width:13px; height:7px; border-radius:0 0 9px 9px' },
+  { max: 999, hood: "#fffaf0", face: "#fff", op: 1,      say: "도깨비도 감탄했다",    eye: '<i class="slit"></i><i class="slit"></i>', mo: 'width:16px; height:9px; border-radius:0 0 11px 11px' }
 ];
 
 function calMood(ms) {
@@ -1753,9 +1856,9 @@ function calMood(ms) {
   return {
     say: m.say,
     html: '<div class="cal-dk" style="opacity:' + m.op + '">' +
-      '<span class="hn l"></span><span class="hn r"></span>' +
+      '<span class="hn l" style="background:' + m.face + '"></span><span class="hn r" style="background:' + m.face + '"></span>' +
       '<span class="hd" style="background:' + m.hood + '">' +
-        '<span class="fc"><span class="ey">' + m.eye + '</span><span class="mo" style="' + m.mo + '"></span></span>' +
+        '<span class="fc" style="background:' + m.face + '"><span class="ey">' + m.eye + '</span><span class="mo" style="' + m.mo + '"></span></span>' +
       '</span>' +
     '</div>'
   };
@@ -1785,7 +1888,7 @@ function renderCalendar(live, key) {
     const strong = ms / 3600000 >= 3;
     const ring = k === key ? "#f6f2e9" : ms > 0 ? "transparent" : "#2b2823";
     const mood = calMood(ms);
-    html += '<div class="cal-cell" title="' + k + " · " + fmtShort(ms) + " · 딴짓 " + rec.dist + "회 · " + mood.say + '" style="background:' + levelColor(ms) + '; border:1px solid ' + ring + '">' +
+    html += '<div class="cal-cell" data-say="' + esc(mood.say) + '" data-when="' + k + " · " + fmtShort(ms) + " · 딴짓 " + rec.dist + '회" title="' + k + " · " + fmtShort(ms) + " · 딴짓 " + rec.dist + "회 · " + mood.say + '" style="background:' + levelColor(ms) + '; border:1px solid ' + ring + '">' +
       '<div class="cal-d" style="color:' + (ms > 0 ? (strong ? "#fffaf0" : "#e0d8ca") : "#5f5b54") + '">' + d + '</div>' +
       mood.html +
       '<div class="cal-h" style="color:' + (strong ? "rgba(255,250,240,.8)" : "#9b8f80") + '">' + (ms >= 60000 ? (ms / 3600000).toFixed(1) : "") + '</div>' +
@@ -1793,6 +1896,19 @@ function renderCalendar(live, key) {
   }
 
   $("calGrid").innerHTML = html;
+
+  const setSay = el => {
+    $("calSayLine").textContent = el.getAttribute("data-say");
+    $("calSayDate").textContent = el.getAttribute("data-when");
+  };
+  const cells = $("calGrid").querySelectorAll(".cal-cell");
+  Array.prototype.forEach.call(cells, el => {
+    el.onmouseenter = () => setSay(el);
+    el.onclick = () => setSay(el);
+    el.style.cursor = "pointer";
+  });
+  const todayCell = cells[new Date(y, m, 1).getMonth() === new Date().getMonth() && y === new Date().getFullYear() ? new Date().getDate() - 1 : 0];
+  if (todayCell) setSay(todayCell);
   $("calSummary").textContent = cnt > 0
     ? cnt + "일 · 합계 " + fmtShort(sum) + " · 하루 평균 " + fmtShort(sum / cnt)
     : "이 달은 아직 기록이 없다";
