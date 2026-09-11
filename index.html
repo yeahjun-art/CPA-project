@@ -1157,6 +1157,12 @@ async function initAuth() {
 
 $("signInBtn").onclick = async () => {
   if (sb) {
+    const btn = $("signInBtn"), note = $("signInNote");
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
+    btn.style.cursor = "default";
+    btn.innerHTML = '<span class="g-mark">G</span>도깨비 공부방으로 이동하는 중';
+    if (note) note.textContent = "잠시만 기다린다.";
     await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin } });
   } else {
     state.user = { id: "local", name: "공부하는 사람", email: "이 브라우저에 저장 중" };
