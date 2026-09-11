@@ -335,7 +335,7 @@
   </div>
 
   <button class="g-btn" id="signInBtn"><span class="g-mark">G</span>Google 계정으로 시작하기</button>
-  <div style="font-size:12.5px; color:#6f6b64">기록은 계정에 저장되어 다른 기기에서도 이어진다.</div>
+  <div id="signInNote" style="font-size:12.5px; color:#6f6b64">기록은 계정에 저장되어 다른 기기에서도 이어진다.</div>
 </div>
 
 <!-- ================= 공부 중 화면 ================= -->
@@ -701,7 +701,7 @@
 const SUPABASE_URL = "https://dyfrhouqmsgolzkqtexp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZnJob3VxbXNnb2x6a3F0ZXhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMjU0NDIsImV4cCI6MjEwMzYwMTQ0Mn0.DkSGSj_U9rQNMLpGEpK_TXmMMyMGlYm7eJ-qChl9vQM";
 
-const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+let sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 </script>
@@ -1103,8 +1103,34 @@ async function loadRemote() {
 }
 
 /* ---------------- 로그인 ---------------- */
+/* 서버가 살아 있는지 먼저 확인한다. 정지/삭제 상태면 로컬 모드로 내려간다. */
+async function serverAlive() {
+  if (!sb) return false;
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 5000);
+    await fetch(SUPABASE_URL + "/auth/v1/health", { signal: ctl.signal, cache: "no-store" });
+    clearTimeout(t);
+    return true;
+  } catch (e) { return false; }
+}
+
+function goLocalMode() {
+  sb = null;
+  const note = $("signInNote");
+  if (note) {
+    note.innerHTML = '서버에 연결할 수 없어 이 브라우저에만 기록한다.<br>연결이 돌아오면 계정 저장으로 되돌아간다.';
+    note.style.color = "#b4564c";
+  }
+  const btn = $("signInBtn");
+  if (btn) btn.innerHTML = '<span class="g-mark">·</span>이 브라우저에 저장하며 시작하기';
+  loadLocal();
+  render();
+}
+
 async function initAuth() {
   if (!sb) return;
+  if (!(await serverAlive())) { goLocalMode(); return; }
   const { data } = await sb.auth.getSession();
   if (data.session) {
     const u = data.session.user;
@@ -1138,6 +1164,27 @@ $("signInBtn").onclick = async () => {
     render();
   }
 };
+
+/* 오프라인으로 쓰던 중 서버가 돌아오면 계정 로그인으로 복귀할 수 있게 한다. */
+setInterval(async () => {
+  if (sb || !SUPABASE_URL || !window.supabase) return;
+  if (state.user && state.user.id !== "local") return;
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 5000);
+    await fetch(SUPABASE_URL + "/auth/v1/health", { signal: ctl.signal, cache: "no-store" });
+    clearTimeout(t);
+  } catch (e) { return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const note = $("signInNote");
+  if (note) {
+    note.textContent = "기록은 계정에 저장되어 다른 기기에서도 이어진다.";
+    note.style.color = "#6f6b64";
+  }
+  const btn = $("signInBtn");
+  if (btn) btn.innerHTML = '<span class="g-mark">G</span>Google 계정으로 시작하기';
+  render();
+}, 60000);
 
 $("signOutBtn").onclick = async () => {
   if (sb) await sb.auth.signOut();
